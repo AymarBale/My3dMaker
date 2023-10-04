@@ -1,5 +1,6 @@
 package ImageTaker;
 
+import ColorsPaletteExtraction.Extractor;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.io.File;
 
 public class GetMyImageAlongAxe extends Application {
+    public static String chosenAxe = "";
     public static String path = "";
     @Override
     public void start(Stage stage){
@@ -30,16 +32,32 @@ public class GetMyImageAlongAxe extends Application {
         chooseFile.setOnAction(event -> {
             File selectedFile = fileChooser.showOpenDialog(stage);
             path = selectedFile.getPath();
-            System.out.println(path);
         });
         butX.setOnAction(event -> {
             butX.setLayoutY(375);
+            chosenAxe += "X";
         });
         butY.setOnAction(event -> {
             butY.setLayoutY(375);
         });
         butZ.setOnAction(event -> {
             butZ.setLayoutY(375);
+            chosenAxe += "Z";
+        });
+        importer.setOnAction(event -> {
+            try {
+                stage.close();
+                Stage secondWindow = new Stage();
+                Extractor e = new Extractor();
+                Extractor.imagePath = path;
+                e.start(secondWindow);
+                secondWindow.setTitle("extractor page");
+                secondWindow.show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         });
         root.getChildren().add(butX);/*root.getChildren().add(butY);*/root.getChildren().add(butZ);
         root.getChildren().add(line);

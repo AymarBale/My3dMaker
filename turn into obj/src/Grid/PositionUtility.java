@@ -2,6 +2,7 @@ package Grid;
 
 import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
+import ImageTaker.GetMyImageAlongAxe;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.input.MouseButton;
@@ -12,6 +13,7 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.*;
 
+import static ColorsPaletteExtraction.Extractor.myCubes;
 import static Grid.GridPage.c;
 import static Utils3DCreation.com.Utils.*;
 
@@ -102,8 +104,7 @@ public class PositionUtility {
         }else if(data[1].length == 0){
             data[1] = d;
             int [] f = PutZValue(connect);
-            cubesXZ = AddCubesToArray(cubesXZ,f[0],f[1],f[2]);
-            System.out.println(Arrays.deepToString(cubesXZ));
+            cubesX = AddCubesToArray(cubesX,f[0],f[1],f[2]);
         }
         return data;
     }
@@ -112,19 +113,25 @@ public class PositionUtility {
         for(int i = 0 ; i < data.length ; i++){
             data[i][2] = z;
         }
-        System.out.println(Arrays.deepToString(data));
         return data;
     }
 
     public static void addCubeToGrid(Pane p, ArrayList<Tracker> receivedCubes){
+        System.out.println(receivedCubes.size());
+        int selectedAxis = 0;
+        if(GetMyImageAlongAxe.chosenAxe.equals("Z")){
+            selectedAxis += 650;
+        }
         for (int i = 0; i < receivedCubes.size(); i++){
             c = receivedCubes.get(i).col;
-            p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(Extractor.myCubes).get(i).x, transformPosition(Extractor.myCubes).get(i).y, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
+
+            p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(myCubes).get(i).x+selectedAxis, transformPosition(myCubes).get(i).y, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
             arrCol.add(c);
             allColArr.add(receivedCubes.get(i).col);
-            cubesXZ = AddCubesToArray(cubesXZ,(int) transformPosition(Extractor.myCubes).get(i).x/10, (int) transformPosition(Extractor.myCubes).get(i).y/10,0);
+
         }
         arrCol = (ArrayList<Color>) uniqueColors(arrCol);
+
     }
 
     public static ArrayList<Tracker> transformPosition(ArrayList<Tracker> receivedCubes){
@@ -164,7 +171,7 @@ public class PositionUtility {
         }
         return mat;
     }
-    public static void printArrayList(ArrayList<Color> arr){
+    public static void printArrayList(ArrayList<Tracker> arr){
         for (int i = 0; i < arr.size(); i++) {
             System.out.println(arr.get(i) + " ----------------->"+i);
         }

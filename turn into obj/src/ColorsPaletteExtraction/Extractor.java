@@ -27,10 +27,11 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Extractor extends Application {
-    public static int myGridSize = 10;
+    public static int myGridSizeX = 10;
+    public static int myGridSizeY = 10;
     public static double [] currentPos = {0,0};
-    public static String imagePath = "C:\\Users\\aymar\\Documents\\3Dfiles\\beast.png";
-    public static Image imag = new Image(imagePath);
+    public static String imagePath ;
+    public static Image imag ;
     public static Group root = new Group();
     public static Group rectGroup = new Group();
     public static Group remake = new Group();
@@ -44,6 +45,9 @@ public class Extractor extends Application {
 
     @Override
     public void start(Stage stage) {
+
+
+        imag = new Image(imagePath);
         // Load your image (replace "your_image.png" with your image file path)
         AtomicInteger opt = new AtomicInteger();
         Image image = new Image(imagePath);
@@ -56,7 +60,9 @@ public class Extractor extends Application {
         Button remakeImg = new Button("Remake the image");
         Button openNewStage = new Button("New Scene");
         Button gridSizeX = new Button("SetTheGridSizeX");
-        javafx.scene.control.TextField gridSizeText = new javafx.scene.control.TextField();
+        javafx.scene.control.TextField gridSizeTextX = new javafx.scene.control.TextField();
+        Button gridSizeY = new Button("SetTheGridSizeY");
+        javafx.scene.control.TextField gridSizeTextY = new javafx.scene.control.TextField();
 
         Label numLabel = new Label();
 
@@ -69,7 +75,9 @@ public class Extractor extends Application {
         root.getChildren().add(remakeImg);
         root.getChildren().add(openNewStage);
         root.getChildren().add(gridSizeX);
-        root.getChildren().add(gridSizeText);
+        root.getChildren().add(gridSizeTextX);
+        root.getChildren().add(gridSizeY);
+        root.getChildren().add(gridSizeTextY);
 
         sliderX.setShowTickLabels(true);
         sliderY.setShowTickLabels(true);
@@ -85,10 +93,14 @@ public class Extractor extends Application {
         gridSizeX.setLayoutX(image.getWidth()+100);
         gridSizeX.setLayoutY(300);
 
-        gridSizeText.setLayoutX(image.getWidth()+100);
-        gridSizeText.setLayoutY(350);
+        gridSizeTextX.setLayoutX(image.getWidth()+100);
+        gridSizeTextX.setLayoutY(350);
 
+        gridSizeY.setLayoutX(image.getWidth()+100);
+        gridSizeY.setLayoutY(400);
 
+        gridSizeTextY.setLayoutX(image.getWidth()+100);
+        gridSizeTextY.setLayoutY(450);
         
         sliderX.setRotate(90);
         sliderX.setLayoutX(image.getWidth());
@@ -99,7 +111,12 @@ public class Extractor extends Application {
         numLabel.setLayoutY(200);
 
         gridSizeX.setOnAction(event -> {
-            myGridSize = Integer.parseInt(gridSizeText.getText());
+            myGridSizeX = Integer.parseInt(gridSizeTextX.getText());
+        });
+
+        gridSizeY.setOnAction(event -> {
+            myGridSizeY = Integer.parseInt(gridSizeTextY.getText());
+            System.out.println(myGridSizeY);
         });
         getAllPos.setOnAction(event -> {
             opt.set(1);
@@ -125,7 +142,7 @@ public class Extractor extends Application {
         sliderX.setOnMouseReleased(event -> {
             rectGroup.getChildren().clear();
             numLabel.setText(String.valueOf(additiveX));
-            GridL(currentPos[0],currentPos[1]/*10,10*/,myGridSize);//13.3
+            GridL(currentPos[0],currentPos[1]/*10,10*/,myGridSizeX,myGridSizeY);//13.3
         });
 
         StackPane jo = new StackPane(imageView);
@@ -158,7 +175,7 @@ public class Extractor extends Application {
                         if(opt.get() == 0){
                         rectGroup.getChildren().clear();
                         //GridL(e.getX(),e.getY(),26);
-                            GridL(e.getX(),e.getY(),myGridSize);
+                            GridL(e.getX(),e.getY(),myGridSizeX,myGridSizeY);
                             currentPos[0] = e.getX();
                             currentPos[1] = e.getY();/**/
                         }else if(opt.get() == 1){
@@ -173,16 +190,16 @@ public class Extractor extends Application {
         stage.setScene(scene);
         stage.setTitle("Pixel Color Viewer with Rectangle");
         stage.show();
-    //QuickShort();
+        //QuickShort(stage);
 
     }
 
-    public static void GridL(double x,double y,int xGrid){
+    public static void GridL(double x,double y,int xGrid,int yGrid){
         cubePosArr = new double[][]{};
         double initX = x;
 
         double initY = y;
-        for (int i = 0; i < xGrid; i++) {
+        for (int i = 0; i < yGrid; i++) {
             MakeCube(x,initY);
 
             initX = x;
@@ -229,11 +246,9 @@ public class Extractor extends Application {
 
     public static double[][] addArrayToIntArrays(double[][] arrayOfArrays, double[] arrayToAdd) {
         double newArray[][] = new double[arrayOfArrays.length + 1][];
-        //copy original array into new array
         for (int i = 0; i <arrayOfArrays.length;  i++) {
             newArray[i] = arrayOfArrays[i];
         }
-        //add element to the new array
         newArray[arrayOfArrays.length] = arrayToAdd;
         return newArray;
     }
@@ -253,10 +268,9 @@ public class Extractor extends Application {
     }
 
     public static void AddCubesToSender(){
-        System.out.println("The size of the array" + cubePosArr[0].length );
         for (int i = 0; i < cubePosArr.length; i++) {
 
-                if(!turnIntoRgb(imag,cubePosArr[i][0],cubePosArr[i][1]).equals(javafx.scene.paint.Color.WHITE)) {
+                if((!turnIntoRgb(imag,cubePosArr[i][0],cubePosArr[i][1]).equals(javafx.scene.paint.Color.WHITE))&((turnIntoRgb(imag,cubePosArr[i][0],cubePosArr[i][1])).getOpacity() == 1)) {
                     myCubes.add(new Tracker(cubePosArr[i][0], cubePosArr[i][1], 0, turnIntoRgb(imag, cubePosArr[i][0], cubePosArr[i][1])));
                 }
         }
@@ -264,7 +278,7 @@ public class Extractor extends Application {
 
     public static void timeToRemake(){
         for (int i = 0; i < myCubes.size(); i++){
-            Rectangle r = new Rectangle(15.514,15.514);
+            Rectangle r = new Rectangle(additiveX,additiveX);
             r.setX(myCubes.get(i).x);
             r.setY(myCubes.get(i).y);
             r.setFill(myCubes.get(i).col);
@@ -272,14 +286,14 @@ public class Extractor extends Application {
         }
     }
 
-    public static void QuickShort(){
+    public static void QuickShort(Stage s){
 
         additiveX = 15.31;
-        GridL(18.4,24.0,26);
+        //GridL(18.4,24.0,26);
         AddCubesToSender();
         timeToRemake();
         try {
-            //openSecondStage();
+            openSecondStage(s);
         } catch (Exception e) {
             e.printStackTrace();
         }

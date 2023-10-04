@@ -1,4 +1,5 @@
 package Utils3DCreation.com;
+import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
 import Grid.PositionUtility;
 import javafx.scene.paint.Color;
@@ -17,9 +18,9 @@ public class Utils {
         public static int [][] cubesX = {};
         public static int [][] cubesZ = {};
         public static int [][] cubesXZ = {}; //array of position where to place cubes
-        public static ArrayList<Color> allColArr = new ArrayList<>();
-        public static ArrayList<Color> arrCol  = new ArrayList<>();
-        public static int colorCount = -1;
+        public static ArrayList<Color> allColArr = new ArrayList<>(); //toute couleur
+        public static ArrayList<Color> arrCol  = new ArrayList<>();// seulement couleur principale
+        public static int colorCount = 0;
 
         public static void Create3DObject(){// function to create cubes
 
@@ -32,8 +33,8 @@ public class Utils {
                     {0+x_ori,1+y_ori,1+z_ori},{1+x_ori,1+y_ori,1+z_ori},{1+x_ori,1+y_ori,0+z_ori}}, {{0+x_ori,0+y_ori,0+z_ori},{1+x_ori,0+y_ori,0+z_ori},{1+x_ori,0+y_ori,1+z_ori},
                     {0+x_ori,0+y_ori,1+z_ori}}};
 
-            WriteFile("MyName.obj",Preenbule("Nate","bale")+AddVertices(cubesXZ)+CreateVerticesNormals()+MakeMultiply(cubesXZ));
-
+            WriteFile("MyName.obj",Preenbule("Nate","bale")+AddVertices(cubesX)+CreateVerticesNormals()+MakeMultiply(cubesX));
+/**/
         }
         public static void main(String[] args) {
 
@@ -110,10 +111,13 @@ public class Utils {
         vertices += " \n";
         return vertices;
     }
-        public static String MakeACube(/*int dir,*/int arr[][][]){
-        colorCount += 1;
+        public static String MakeACube(int arr[][][]){
+
         String face = "";
-        face += PositionUtility.findCorrectMaterial(allColArr.get(colorCount))+"\ns off\n";
+        if (colorCount < allColArr.size()){
+            face += PositionUtility.findCorrectMaterial(allColArr.get(colorCount)) + "\ns off\n";
+            colorCount += 1;
+        }
         String vn = "2";
         for (int i = 0; i < arr.length; i++) {
 
@@ -135,6 +139,7 @@ public class Utils {
             faceCount+=4;
         }
         return face;
+
     }
 
         public static String MakeMultiply(int data[][]){
@@ -151,7 +156,6 @@ public class Utils {
                 all_faces += MakeACube(arrays);
 
         }
-        //System.out.println("---------\n"+all_faces);
         return all_faces;
     }
 

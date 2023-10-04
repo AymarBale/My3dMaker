@@ -1,6 +1,7 @@
 package Grid;
 
 import ColorsPaletteExtraction.Extractor;
+import Utils3DCreation.com.Utils;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 
 import static Grid.PositionUtility.*;
 import static Utils3DCreation.com.Utils.Create3DObject;
+import static Utils3DCreation.com.Utils.cubesX;
 import static javafx.application.Application.launch;
 
 public class GridPage extends Application{
