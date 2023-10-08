@@ -15,6 +15,7 @@ import java.util.*;
 
 import static ColorsPaletteExtraction.Extractor.myCubes;
 import static Grid.GridPage.c;
+import static Grid.GridPage.savedArray;
 import static Utils3DCreation.com.Utils.*;
 
 
@@ -116,22 +117,25 @@ public class PositionUtility {
         return data;
     }
 
-    public static void addCubeToGrid(Pane p, ArrayList<Tracker> receivedCubes){
-        System.out.println(receivedCubes.size());
-        int selectedAxis = 0;
-        if(GetMyImageAlongAxe.chosenAxe.equals("Z")){
-            selectedAxis += 650;
+    public static void addCubeToGrid(Pane p1,Pane p2){
+
+        for (int j = 0; j < savedArray.size(); j++) {
+            Pane p = p1;
+            int selectedAxis = 0;
+            ArrayList <Tracker> receivedCubes = savedArray.get(j).myCubes;
+            if (savedArray.get(j).axis.equals("Z")) {
+                selectedAxis += 650;
+                p = p2;
+            }
+            for (int i = 0; i < receivedCubes.size(); i++) {
+                c = receivedCubes.get(i).col;
+                p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(savedArray.get(j).myCubes).get(i).x + selectedAxis, transformPosition(savedArray.get(j).myCubes).get(i).y, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
+                arrCol.add(c);
+                allColArr.add(receivedCubes.get(i).col);
+
+            }
+            arrCol = (ArrayList<Color>) uniqueColors(arrCol);
         }
-        for (int i = 0; i < receivedCubes.size(); i++){
-            c = receivedCubes.get(i).col;
-
-            p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(myCubes).get(i).x+selectedAxis, transformPosition(myCubes).get(i).y, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
-            arrCol.add(c);
-            allColArr.add(receivedCubes.get(i).col);
-
-        }
-        arrCol = (ArrayList<Color>) uniqueColors(arrCol);
-
     }
 
     public static ArrayList<Tracker> transformPosition(ArrayList<Tracker> receivedCubes){
@@ -171,7 +175,7 @@ public class PositionUtility {
         }
         return mat;
     }
-    public static void printArrayList(ArrayList<Tracker> arr){
+    public static void printArrayList(ArrayList<myImagePosition> arr){
         for (int i = 0; i < arr.size(); i++) {
             System.out.println(arr.get(i) + " ----------------->"+i);
         }

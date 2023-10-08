@@ -35,14 +35,14 @@ public class GetMyImageAlongAxe extends Application {
         });
         butX.setOnAction(event -> {
             butX.setLayoutY(375);
-            chosenAxe += "X";
+            chosenAxe = "X";
         });
         butY.setOnAction(event -> {
             butY.setLayoutY(375);
         });
         butZ.setOnAction(event -> {
             butZ.setLayoutY(375);
-            chosenAxe += "Z";
+            chosenAxe = "Z";
         });
         importer.setOnAction(event -> {
             try {

@@ -1,7 +1,8 @@
 package Grid;
 
 import ColorsPaletteExtraction.Extractor;
-import Utils3DCreation.com.Utils;
+import ColorsPaletteExtraction.Tracker;
+import ImageTaker.GetMyImageAlongAxe;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -11,24 +12,22 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import ColorsPaletteExtraction.Extractor.*;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static Grid.PositionUtility.*;
 import static Utils3DCreation.com.Utils.Create3DObject;
-import static Utils3DCreation.com.Utils.cubesX;
 import static javafx.application.Application.launch;
 
 public class GridPage extends Application{
 
 
     public static Color c = Color.BLACK;
-
+    public static ArrayList<myImagePosition> savedArray = new ArrayList<myImagePosition>();
     public void start(Stage Stage) throws Exception{
 
         Group root = new Group();
@@ -50,14 +49,32 @@ public class GridPage extends Application{
         Button sub = new Button("SUBMIT");
         ColorPicker cp = new ColorPicker(Color.BLUE);
         Button sameZ = new Button("Apply same z");
+        Button loadAnother = new Button("Load another scene");
 
         sameZ.setLayoutY(500);
         sameZ.setLayoutX(440);
+        loadAnother.setLayoutY(500);
+        loadAnother.setLayoutX(740);
         text.setLayoutY(500);
         text.setLayoutX(540);
+        loadAnother.setOnAction(event -> {
+            try {
+                Extractor.ResetVariables();
+                Stage.close();
+                Stage secondWindow = new Stage();
+                GetMyImageAlongAxe e = new GetMyImageAlongAxe();
+                e.start(secondWindow);
+                secondWindow.setTitle("extractor page");
+                secondWindow.show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         sameZ.setOnAction(value ->  {
             putZForSelect(selectedCubes, Integer.parseInt(text.getText()));
         });
+        root.getChildren().add(loadAnother);
         root.getChildren().add(sameZ);
         root.getChildren().add(text);
         root.getChildren().add(con);
@@ -79,8 +96,11 @@ public class GridPage extends Application{
                 c = cp.getValue();
             }
         });
-        addCubeToGrid(p1,Extractor.myCubes);
-
+        myImagePosition currPos = new myImagePosition();
+        currPos.myCubes = Extractor.myCubes;
+        currPos.axis = GetMyImageAlongAxe.chosenAxe;
+        savedArray.add(currPos);
+        addCubeToGrid(p1,p2);
         Scene scene = new Scene(root, 1100, 600);
         Stage.setTitle("grid");
         Stage.setScene(scene);
@@ -91,4 +111,9 @@ public class GridPage extends Application{
     public static void main(String[] args) {
         launch(args);
     }
+}
+
+class myImagePosition{
+    public ArrayList<Tracker> myCubes = new ArrayList<>();
+    String axis = "";
 }

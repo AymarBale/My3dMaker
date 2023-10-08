@@ -32,7 +32,7 @@ public class Extractor extends Application {
     public static double [] currentPos = {0,0};
     public static String imagePath ;
     public static Image imag ;
-    public static Group root = new Group();
+    public Group root = new Group();
     public static Group rectGroup = new Group();
     public static Group remake = new Group();
     public static double additiveX = 13.4;
@@ -45,10 +45,7 @@ public class Extractor extends Application {
 
     @Override
     public void start(Stage stage) {
-
-
         imag = new Image(imagePath);
-        // Load your image (replace "your_image.png" with your image file path)
         AtomicInteger opt = new AtomicInteger();
         Image image = new Image(imagePath);
 
@@ -116,7 +113,6 @@ public class Extractor extends Application {
 
         gridSizeY.setOnAction(event -> {
             myGridSizeY = Integer.parseInt(gridSizeTextY.getText());
-            System.out.println(myGridSizeY);
         });
         getAllPos.setOnAction(event -> {
             opt.set(1);
@@ -222,7 +218,6 @@ public class Extractor extends Application {
 
     }
     public static void main(String[] args) {
-
         Application.launch(args);
     }
 
@@ -257,7 +252,6 @@ public class Extractor extends Application {
         PixelReader pixelReader = image.getPixelReader();
 
         javafx.scene.paint.Color color = pixelReader.getColor((int) x, (int) y);
-        // Read the color of the pixel at the clicked coordinates
 
         int red = (int) (color.getRed() * 255);
         int green = (int) (color.getGreen() * 255);
@@ -308,6 +302,18 @@ public class Extractor extends Application {
         secondStage.show();
 
 
+    }
+
+    public static void ResetVariables(){
+        rectGroup = new Group();
+        remake = new Group();
+        additiveX = 13.4;
+        myCubes = new ArrayList<>();
+        cubePosArr = new double[][]{};
+        myGridSizeX = 10;
+        myGridSizeY = 10;
+        currentPos = new double[]{0, 0};
+        imag = null;
     }
 
 }
