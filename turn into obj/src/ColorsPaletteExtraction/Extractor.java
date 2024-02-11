@@ -1,29 +1,30 @@
 package ColorsPaletteExtraction;
 
+import Editor.EditorSettings;
 import Grid.GridPage;
+import ImageTaker.GetMyImageAlongAxe;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Extractor extends Application {
@@ -170,10 +171,9 @@ public class Extractor extends Application {
                     public void handle(MouseEvent e) {
                         if(opt.get() == 0){
                         rectGroup.getChildren().clear();
-                        //GridL(e.getX(),e.getY(),26);
                             GridL(e.getX(),e.getY(),myGridSizeX,myGridSizeY);
                             currentPos[0] = e.getX();
-                            currentPos[1] = e.getY();/**/
+                            currentPos[1] = e.getY();
                         }else if(opt.get() == 1){
 
 
@@ -186,7 +186,6 @@ public class Extractor extends Application {
         stage.setScene(scene);
         stage.setTitle("Pixel Color Viewer with Rectangle");
         stage.show();
-        //QuickShort(stage);
 
     }
 
@@ -221,17 +220,9 @@ public class Extractor extends Application {
         Application.launch(args);
     }
 
-    public static Color GetColors(double x, double y ){
-        double xValue = x;
-        double yValue = y;
-        Robot robot = null;
-        try {
-            robot = new Robot();
-        } catch (AWTException e) {
-            e.printStackTrace();
-        }
-        Color color = robot.getPixelColor((int) xValue, (int) yValue);
-        return color;
+    public static void GetColors(double x, double y ){
+
+        return ;
     }
 
     public static void getPosition(double x,double y){
@@ -257,13 +248,11 @@ public class Extractor extends Application {
         int green = (int) (color.getGreen() * 255);
         int blue = (int) (color.getBlue() * 255);
 
-        /*System.out.println(red+","+green+","+blue);*/
         return color;
     }
 
     public static void AddCubesToSender(){
         for (int i = 0; i < cubePosArr.length; i++) {
-
                 if((!turnIntoRgb(imag,cubePosArr[i][0],cubePosArr[i][1]).equals(javafx.scene.paint.Color.WHITE))&((turnIntoRgb(imag,cubePosArr[i][0],cubePosArr[i][1])).getOpacity() == 1)) {
                     myCubes.add(new Tracker(cubePosArr[i][0], cubePosArr[i][1], 0, turnIntoRgb(imag, cubePosArr[i][0], cubePosArr[i][1])));
                 }
@@ -281,13 +270,23 @@ public class Extractor extends Application {
     }
 
     public static void QuickShort(Stage s){
+        if(GetMyImageAlongAxe.chosenAxe.equals("X")){
+            additiveX = 10.270;
+            GridL(12.4,12.4,9,9);
+            AddCubesToSender();
+            timeToRemake();
+        }else if(GetMyImageAlongAxe.chosenAxe.equals("Z")){
+            additiveX = 10.270;
+            GridL(12.4,12.2,8,9);
+            AddCubesToSender();
+            timeToRemake();
+        }
 
-        additiveX = 15.31;
-        //GridL(18.4,24.0,26);
-        AddCubesToSender();
-        timeToRemake();
-        try {
-            openSecondStage(s);
+        /**/try {
+            if(GetMyImageAlongAxe.count == 0){}
+                openSecondStage(s);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -295,12 +294,10 @@ public class Extractor extends Application {
 
     private static void openSecondStage(Stage innerStage) throws Exception {
         innerStage.close();
-        Stage secondStage = new Stage();
-        GridPage g = new GridPage();
-        g.start(secondStage);
-        secondStage.setTitle("Second Stage");
-        secondStage.show();
-
+        Tab myTab = EditorSettings.tabPane.getTabs().get(EditorSettings.tabPane.getTabs().size()-1);
+        myTab.setText(myTab.getText()+" AXIS:"+GetMyImageAlongAxe.chosenAxe);
+        myTab.setContent(GridPage.exportPane(GetMyImageAlongAxe.chosenAxe));
+        ResetVariables();
 
     }
 

@@ -1,60 +1,95 @@
 package Selector;
+
 import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class SquareSelector extends Application {
-    private double startX, startY;
-    private Rectangle selectionRectangle;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
-    @Override
-    public void start(Stage primaryStage) {
-        Pane root = new Pane();
-        Scene scene = new Scene(root, 400, 400);
+import static javafx.application.Application.launch;
 
-        selectionRectangle = new Rectangle(0, 0, 0, 0);
-        selectionRectangle.setFill(Color.TRANSPARENT);
-        selectionRectangle.setStroke(Color.GOLD);
-        selectionRectangle.setStrokeWidth(1);
+public class SquareSelector {
 
-        root.getChildren().add(selectionRectangle);
+    public static double startX;
+    public static double startY;
+    public static double endX = 0;
+    public static double endY = 0;
+    private static Rectangle selectionRectangle;
+    public static Button done = new Button("Done");
 
-        scene.setOnMousePressed(event -> {
-            startX = event.getX();
-            startY = event.getY();
-            selectionRectangle.setX(startX);
-            selectionRectangle.setY(startY);
+
+    public static Pane test(Pane root,int x,int y,int l) {
+        root.setPrefWidth(x);
+        root.setPrefHeight(y);
+        root.setOnMousePressed(e -> {
+            startX = e.getX();
+            startY = e.getY();
+
+            selectionRectangle = new Rectangle(startX, startY, 0, 0);
+            selectionRectangle.setFill(Color.GOLD.deriveColor(0, 1, 1, 0.8));
+            root.getChildren().add(selectionRectangle);
+        });
+
+        root.setOnMouseDragged(e -> {
             selectionRectangle.setWidth(0);
             selectionRectangle.setHeight(0);
+            endX = e.getX();
+            endY = e.getY();
+
+            double width = endX - startX;
+            double height = endY - startY;
+
+            if (width < 0) {
+                selectionRectangle.setTranslateX(width);
+                width = -width;
+            }
+            if (height < 0) {
+                selectionRectangle.setTranslateY(height);
+                height = -height;
+            }
+            selectionRectangle.setWidth(width);
+            selectionRectangle.setHeight(height);
         });
-
-        scene.setOnMouseDragged(event -> {
-            selectionRectangle.setStroke(Color.GOLD);
-            double currentX = event.getX();
-            double currentY = event.getY();
-            double width = currentX - startX;
-            double height = currentY - startY;
-
-            selectionRectangle.setX(width >= 0 ? startX : currentX);
-            selectionRectangle.setY(height >= 0 ? startY : currentY);
-            selectionRectangle.setWidth(Math.abs(width));
-            selectionRectangle.setHeight(Math.abs(height));
+        /**/
+        root.setOnMouseReleased(e -> {
+            root.getChildren().remove(selectionRectangle);
+            if (l==0){
+                startX -= 10;
+                startY -= 10;
+            }else {
+                startX = startX+l;
+                endX = endX+l;
+            }
         });
-
-        scene.setOnMouseReleased(event -> {
-            selectionRectangle.setStroke(Color.WHITE);
-            selectionRectangle.setWidth(0);
-            selectionRectangle.setHeight(0);
-        });
-
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return root;
+    }
+    public Group intiateLine(){
+        Group g = new Group();
+        Text t = new Text("Drag your mouse to create a square \n " +
+                "that will represent your group");
+        done.setLayoutY(30);
+        g.setLayoutY(125);
+        g.getChildren().add(done);
+        g.getChildren().add(t);
+        return g;
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 }
+
+class Main extends Region  {
+
+
+}
+

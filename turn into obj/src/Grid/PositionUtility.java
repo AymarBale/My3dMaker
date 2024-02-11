@@ -2,20 +2,27 @@ package Grid;
 
 import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
-import ImageTaker.GetMyImageAlongAxe;
+import Editor.EditorSettings;
+import Selector.ColorSelector;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
 
-import static ColorsPaletteExtraction.Extractor.myCubes;
-import static Grid.GridPage.c;
-import static Grid.GridPage.savedArray;
+import static Grid.GridPage.*;
+import static Selector.SquareSelector.test;
 import static Utils3DCreation.com.Utils.*;
 
 
@@ -23,18 +30,14 @@ public class PositionUtility {
     public static int [][] connect = {{},{}};
     public static int [][] selectedCubes = {};
     public static int xorz = 0;
+    public static boolean makeConnection = false;
+    public static ArrayList<Integer> myConnector = new ArrayList<>();
     public static Pane makeGrid(int n, int x_z, CheckBox c,CheckBox s){
 
         double width = 10;
         Pane pane = new Pane();
 
-        pane.setOnMouseClicked(e -> {
-            int x = (int)e.getX()/10;
-            int y = (int)e.getY()/10;
-            xorz = x_z;
-            DrawSquare(pane,(int)e.getX()/10,(int)e.getY()/10,c,s);
 
-        });
         Rectangle[][] rec = new Rectangle [n][n];
 
         for(int i=0; i<n; i++){
@@ -53,11 +56,12 @@ public class PositionUtility {
         return pane;
     }
 
+
     public static Pane DrawSquare(Pane a,int x,int y,CheckBox con,CheckBox sel){
-        Rectangle rect = new Rectangle(10,10);
+        Rectangle rect = new Rectangle(8,8);
         rect.setFill(c);
-        rect.setX(x*10);
-        rect.setY(y*10);
+        rect.setX((x+0.1)*10);
+        rect.setY((y+0.1)*10);
         a.getChildren().add(rect);
         rect.addEventHandler(MouseEvent.MOUSE_CLICKED,
                 new EventHandler<MouseEvent>() {
@@ -74,13 +78,13 @@ public class PositionUtility {
                         }
                     }
         });
-
+/*
         if(xorz == 1){
             cubesX = AddCubesToArray(cubesX,x,y,0);
         }
         if(xorz == 2){
             cubesZ = AddCubesToArray(cubesZ,x,y,0);
-        }
+        }*/
         return a;
     }
 
@@ -118,24 +122,53 @@ public class PositionUtility {
     }
 
     public static void addCubeToGrid(Pane p1,Pane p2){
+        theMainExtratorArr.clear();
+        allColArr.clear();
 
         for (int j = 0; j < savedArray.size(); j++) {
             Pane p = p1;
             int selectedAxis = 0;
             ArrayList <Tracker> receivedCubes = savedArray.get(j).myCubes;
             if (savedArray.get(j).axis.equals("Z")) {
-                selectedAxis += 650;
                 p = p2;
+                selectedAxis += p.getLayoutX();
+
             }
             for (int i = 0; i < receivedCubes.size(); i++) {
+
                 c = receivedCubes.get(i).col;
-                p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(savedArray.get(j).myCubes).get(i).x + selectedAxis, transformPosition(savedArray.get(j).myCubes).get(i).y, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
+                int plusForEarPig = 0;
+                if(selectedAxis != 0){
+                    plusForEarPig = 10;
+                }
+                p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(savedArray.get(j).myCubes).get(i).x + selectedAxis, transformPosition(savedArray.get(j).myCubes).get(i).y+plusForEarPig, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
                 arrCol.add(c);
                 allColArr.add(receivedCubes.get(i).col);
-
+                theMainExtratorArr.add(new Tracker(transformPosition(savedArray.get(j).myCubes).get(i).x + selectedAxis,transformPosition(savedArray.get(j).myCubes).get(i).y+plusForEarPig,0,c));
             }
             arrCol = (ArrayList<Color>) uniqueColors(arrCol);
         }
+    }
+
+    public static void addCubeToOneGrid(Pane p1,String axis){
+
+        Pane p = p1;
+        int selectedAxis = 0;
+        ArrayList <Tracker> receivedCubes = savedArray.get(savedArray.size()-1).myCubes;
+
+        for (int i = 0; i < receivedCubes.size(); i++) {
+            c = receivedCubes.get(i).col;
+            int plusForEarPig = 0;
+            if(selectedAxis != 0){
+                plusForEarPig = 10;
+            }
+            p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).x + selectedAxis, transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).y+plusForEarPig, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
+            arrCol.add(c);
+            allColArr.add(receivedCubes.get(i).col);
+            theMainExtratorArr.add(new Tracker(transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).x + selectedAxis,transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).y+plusForEarPig,0,c,axis));
+        }
+        arrCol = (ArrayList<Color>) uniqueColors(arrCol);
+
     }
 
     public static ArrayList<Tracker> transformPosition(ArrayList<Tracker> receivedCubes){
@@ -163,7 +196,6 @@ public class PositionUtility {
                 result.add(color);
             }
         }
-
         return result;
     }
     public static String findCorrectMaterial(Color a){
@@ -175,9 +207,132 @@ public class PositionUtility {
         }
         return mat;
     }
-    public static void printArrayList(ArrayList<myImagePosition> arr){
+    public static void printArrayList(ArrayList<Tracker> arr){
         for (int i = 0; i < arr.size(); i++) {
-            System.out.println(arr.get(i) + " ----------------->"+i);
+            //System.out.println("("+arr.get(i).getRed()*255 + ")"+"("+arr.get(i).getGreen()*255 + ")"+"("+arr.get(i).getBlue()*255 + ")"+i);
+            System.out.println("<---\n"+arr.get(i).x+" \n"+arr.get(i).y+"\n"+arr.get(i).z+"\n--->");
         }
     }
+    public static Color awtToJavaFXColor(java.awt.Color awtColor) {
+        double red = awtColor.getRed();
+        double green = awtColor.getGreen();
+        double blue = awtColor.getBlue();
+        double alpha = awtColor.getAlpha() / 255.0; // Normalize alpha value
+
+        return new Color(red/255, green/255, blue/255, alpha);
+    }
+    public static void getAllCubeWithin(ArrayList <Tracker> theMainExtratorArr,double sX,double sY,double eX,double eY){
+        ArrayList <Tracker> t = new ArrayList<>();
+        int num = 0;
+
+        for (int i = 0; i < theMainExtratorArr.size(); i++) {
+            double tempSX = sX;  // Temporary variable for modified sX
+            double tempEX = eX;
+            if(theMainExtratorArr.get(i).axis.equals(String.valueOf(EditorSettings.mergedAxe.charAt(0)))){
+
+                if((theMainExtratorArr.get(i).x >= tempSX)&(theMainExtratorArr.get(i).y >= sY)&(theMainExtratorArr.get(i).x <= tempEX)&(theMainExtratorArr.get(i).y <= eY)
+                &(theMainExtratorArr.get(i).x != 0)){
+                    num += 1;
+                    t.add(theMainExtratorArr.get(i));
+                }
+            }else if(theMainExtratorArr.get(i).axis.equals(String.valueOf(EditorSettings.mergedAxe.charAt(1)))){
+                tempSX -= 450.00;
+                tempEX -= 450.00;
+
+                if((theMainExtratorArr.get(i).x >= tempSX)&(theMainExtratorArr.get(i).y >= sY)&(theMainExtratorArr.get(i).x <= tempEX)&(theMainExtratorArr.get(i).y <= eY)
+                        &(theMainExtratorArr.get(i).x != 0)){
+                    num += 1;
+                    t.add(theMainExtratorArr.get(i));
+                }
+            }
+        }
+        arrLOfGroup.add(t);
+    }
+    public static Group createGroups(){
+        Group mainGroup = new Group();
+        Text t = new Text("List of all the groups\n" +
+                " inside the array");
+        for (int i = 0; i < arrLOfGroup.size(); i++) {
+            Group g = new Group();
+            Text text = new Text("Group number " + i);
+            Button applyZ = new Button("ApplyZ");
+            Button applyX = new Button("ApplyX");
+            Button applyChange = new Button("Apply Change");
+            TextField t_Input = new TextField();
+            g.getChildren().add(text);g.getChildren().add(applyX);
+            g.getChildren().add(applyZ);
+            g.getChildren().add(applyChange);
+            applyX.setLayoutY(10);
+            applyZ.setLayoutY(40);
+            int finalI = i;
+            applyX.setOnAction(actionEvent -> {
+                setAllX(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(finalI));
+            });
+            applyZ.setOnAction(actionEvent -> {
+                setAllZ(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(finalI));
+            });
+            t_Input.setLayoutY(70);
+            applyChange.setLayoutY(90);
+            applyChange.setOnAction(actionEvent -> {
+                findAndReplace(theMainExtratorArr,arrLOfGroup.get(finalI),arrLOfGroup.get(finalI).get(0).axis);
+                mainGroup.getChildren().remove(g);
+
+            });
+            g.getChildren().add(t_Input);
+            g.setLayoutX(870);
+            g.setLayoutY(150*(i+1));
+            mainGroup.getChildren().add(g);
+
+        }
+        return mainGroup;
+    }
+    public static void setAllX(int x,ArrayList<Tracker> arr){
+
+        for (int i = 0; i < arr.size(); i++) {
+            arr.get(i).z = x;
+        }
+
+    }
+    public static void setAllZ(int z,ArrayList<Tracker> arr){
+
+        for (int i = 0; i < arr.size(); i++) {
+            arr.get(i).z = z;
+        }
+
+    }
+
+    public static void findAndReplace(ArrayList <Tracker> arr1,ArrayList<Tracker> arr2,String axis){
+        for (int i = 0; i < arr1.size(); i++) {
+            for (int j = 0; j < arr2.size(); j++) {
+                if((arr1.get(i).x == arr2.get(j).x)&(arr1.get(i).y == arr2.get(j).y)&(arr1.get(i).axis.equals(arr2.get(j).axis))){
+                    arr1.set(i,arr2.get(j));
+                }
+            }
+        }
+    }
+
+
+    public static void callOn3dCreation(){
+        System.out.println(theMainExtratorArr.size());
+        for (int i = 0; i < theMainExtratorArr.size(); i++) {
+            if(theMainExtratorArr.get(i).axis.equals("X")){
+                cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10,(int) theMainExtratorArr.get(i).z ,(int) theMainExtratorArr.get(i).y/10 );
+            }else if(theMainExtratorArr.get(i).axis.equals("Z")){
+                cubesXZ = AddCubesToArray(cubesXZ, (int) (theMainExtratorArr.get(i).z),(int) (theMainExtratorArr.get(i).x/10) ,(int) (theMainExtratorArr.get(i).y/10) );
+            }else if(theMainExtratorArr.get(i).axis.equals("Y")){
+                cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10 ,(int) theMainExtratorArr.get(i).y/10 ,(int) theMainExtratorArr.get(i).z);
+            }
+            /*
+            else if(theMainExtratorArr.get(i).axis.equals("-X")){
+                cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10,5 ,(int) theMainExtratorArr.get(i).y/10  );
+            }else if(theMainExtratorArr.get(i).axis.equals("-Z")){
+                cubesXZ = AddCubesToArray(cubesXZ, 5,(int) (theMainExtratorArr.get(i).x/10) ,(int) (theMainExtratorArr.get(i).y/10) );
+            }else if(theMainExtratorArr.get(i).axis.equals("-XZ")){
+                cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10 ,(int) theMainExtratorArr.get(i).y/10 ,5);
+            }
+            System.out.println("X: "+(int) theMainExtratorArr.get(i).x/10+" Y: "+(int) (theMainExtratorArr.get(i).y/10)+" Z: "+(int) theMainExtratorArr.get(i).z);*/
+        }
+    }
+
+
 }

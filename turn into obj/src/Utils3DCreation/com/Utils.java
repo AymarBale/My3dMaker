@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Utils {
         public static int faceCount = 0;
@@ -21,11 +23,12 @@ public class Utils {
         public static ArrayList<Color> allColArr = new ArrayList<>(); //toute couleur
         public static ArrayList<Color> arrCol  = new ArrayList<>();// seulement couleur principale
         public static int colorCount = 0;
-
+        public static ArrayList<String> simpleArr = new ArrayList<>();
         public static void Create3DObject(){// function to create cubes
 
+
             CreateFile("MyName.obj");
-            CreateFile("UColors.mtl");
+            //CreateFile("UColors.mtl");
             WriteFile("UColors.mtl",addMaterialShaders());
             int [][][] arrays = new int[][][]{ {{0+x_ori,0+y_ori,0+z_ori},{0+x_ori,1+y_ori,0+z_ori},{1+x_ori,1+y_ori,0+z_ori},{1+x_ori,0+y_ori,0+z_ori}} ,{{1+x_ori,0+y_ori,0+z_ori},
                     {1+x_ori,0+y_ori,1+z_ori},{1+x_ori,1+y_ori,1+z_ori},{1+x_ori,1+y_ori,0+z_ori}},{{0+x_ori,0+y_ori,0+z_ori},{0+x_ori,0+y_ori,1+z_ori},{0+x_ori,1+y_ori,1+z_ori},
@@ -33,12 +36,42 @@ public class Utils {
                     {0+x_ori,1+y_ori,1+z_ori},{1+x_ori,1+y_ori,1+z_ori},{1+x_ori,1+y_ori,0+z_ori}}, {{0+x_ori,0+y_ori,0+z_ori},{1+x_ori,0+y_ori,0+z_ori},{1+x_ori,0+y_ori,1+z_ori},
                     {0+x_ori,0+y_ori,1+z_ori}}};
 
-            WriteFile("MyName.obj",Preenbule("Nate","bale")+AddVertices(cubesX)+CreateVerticesNormals()+MakeMultiply(cubesX));
-/**/
+            WriteFile("MyName.obj",Preenbule("Nate","bale")+AddVertices(cubesXZ)+CreateVerticesNormals()+MakeMultiply(cubesXZ));
         }
-        public static void main(String[] args) {
 
+        private static String mergeFaces(String face1, String face2) {
+            // Extract the vertex strings from each face
+            String[] vertices1 = face1.substring(2).split("\\s+"); // Remove the 'f ' prefix
+            String[] vertices2 = face2.substring(2).split("\\s+"); // Remove the 'f ' prefix
+
+            // Preserve the order of appearance using LinkedHashSet
+            Set<String> uniqueVertices = new LinkedHashSet<>(Arrays.asList(vertices1));
+            uniqueVertices.addAll(Arrays.asList(vertices2));
+
+            // Join the unique vertices into a single line with 'f ' prefix
+            String mergedFace = "f " + String.join(" ", uniqueVertices);
+
+            return mergedFace;
         }
+        private static String reorderVertices(String obj) {
+            String[] objLines = obj.split("\n");
+            for (int i = 0; i < objLines.length; i++) {
+                simpleArr.add(objLines[i]);
+            }
+            return ordonateArray();
+        }
+        public static String ordonateArray(){
+            String allFaces = "";
+            while(simpleArr.size() > 0){
+                allFaces += mergeFaces(simpleArr.get(0),simpleArr.get(1))+"\n";
+                simpleArr.remove(0);
+                simpleArr.remove(0);
+
+
+            };
+            return allFaces;
+        }
+
         public static void CreateFile (String x){
             try {
                 File myObj = new File(x);
@@ -114,10 +147,7 @@ public class Utils {
         public static String MakeACube(int arr[][][]){
 
         String face = "";
-        if (colorCount < allColArr.size()){
-            face += PositionUtility.findCorrectMaterial(allColArr.get(colorCount)) + "\ns off\n";
-            colorCount += 1;
-        }
+
         String vn = "2";
         for (int i = 0; i < arr.length; i++) {
 
@@ -137,6 +167,12 @@ public class Utils {
             face+="f  "+(1+faceCount)+"//"+vn+"  "+(2+faceCount)+"//"+vn+"  "+(3+faceCount)+"//"+vn+"\n";
             face+="f  "+(1+faceCount)+"//"+vn+"  "+(4+faceCount)+"//"+vn+"  "+(3+faceCount)+"//"+vn+"\n";
             faceCount+=4;
+
+        }
+        face = reorderVertices(face);
+        if (colorCount < allColArr.size()){
+                face = PositionUtility.findCorrectMaterial(allColArr.get(colorCount)) + "\ns off\n"+face;
+                colorCount += 1;
         }
         return face;
 
