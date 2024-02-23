@@ -1,0 +1,11 @@
+left x = 3,nez = 1,eyes + skin = 2
+
+right z = 1 ears ,feets = 3
+thing left to do{
+ -group and rules
+ -line selector
+ {not completed because polygons cannot be mixed with lines,not and what happen}
+ -simili
+ -axe button come back when clicked again
+ -close window disappear tab
+}
