@@ -2,6 +2,7 @@ package Grid;
 
 import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
+import Editor.EditorSettings;
 import ImageTaker.GetMyImageAlongAxe;
 import Selector.ColorSelector;
 import Selector.LineSelector;
@@ -172,12 +173,6 @@ public class GridPage extends Application{
         sameZ.setOnAction(value ->  {
             putZForSelect(selectedCubes, Integer.parseInt(text.getText()));
         });
-        /*root.getChildren().add(loadAnother);
-        root.getChildren().add(sameZ);
-        root.getChildren().add(text);
-        root.getChildren().add(con);
-        root.getChildren().add(select);
-        root.getChildren().add(cp);*/
         ScrollPane bigBox = new ScrollPane();
         Pane board = new Pane();
         connectGroups.setOnAction(actionEvent -> {
@@ -185,45 +180,6 @@ public class GridPage extends Application{
             GridPage.createOption[0] = -1;
         });
 
-/*
-        Group info = new Group();
-        Rectangle infoRect = new Rectangle(150,75);
-        Text textInfoX = new Text("X:");textInfoX.setLayoutX(20);
-        textInfoX.setFill(Color.RED);textInfoX.setLayoutY(30);
-        textInfoX.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoY = new Text("Y:");textInfoY.setLayoutX(20);
-        textInfoY.setFill(Color.BLUE);textInfoY.setLayoutY(50);
-        textInfoY.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoZ = new Text("Z:");textInfoZ.setLayoutX(20);
-        textInfoZ.setFill(Color.GREEN);textInfoZ.setLayoutY(70);
-        textInfoZ.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoColor = new Text("Col : ");textInfoColor.setLayoutX(70);
-        textInfoColor.setFill(Color.WHITE);textInfoColor.setLayoutY(70);
-        textInfoColor.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-
-        info.setLayoutX(50);
-        info.setLayoutY(50);
-        infoRect.setFill(Color.GOLD);
-        info.getChildren().add(infoRect);info.getChildren().add(textInfoX);
-        info.getChildren().add(textInfoY);info.getChildren().add(textInfoZ);
-        info.getChildren().add(textInfoColor);
-        //board.getChildren().add(info);
-
-        Rectangle cubeBoard = new Rectangle(1000,175);
-        Text boardText = new Text("all cubes on board");
-        boardText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        boardText.setFill(Color.WHITESMOKE);
-
-        cubeBoard.setFill(Color.BLACK);
-
-        bigBox.setLayoutX(50);
-        bigBox.setLayoutY(410);
-        board.getChildren().add(cubeBoard);board.getChildren().add(boardText);board.getChildren().add(info);
-        boardText.setLayoutY(30);
-        boardText.setLayoutX(20);
-        bigBox.setContent(board);
-        root.getChildren().add(bigBox);
-*/
         root.getChildren().add(createGroups);
         root.getChildren().add(currGroups);
         root.getChildren().add(connectGroups);
@@ -235,13 +191,13 @@ public class GridPage extends Application{
         select.setLayoutY(550);
 
         createGroups.setOnAction(value ->  {
-            connectGroups.setLayoutY(connectGroups.getLayoutY()+150);
+            /*connectGroups.setLayoutY(connectGroups.getLayoutY()+150);
             createOption[0] = 1;
-            Group typeSelect = typeOfSelection(root,currGroups,p1,p2);
+            Group typeSelect = typeOfSelection(root,currGroups,p1,p2,b);
             typeSelect.setLayoutX(870);
             typeSelect.setLayoutY(100);
             currGroups.setLayoutY(250);
-            root.getChildren().add(typeSelect);
+            root.getChildren().add(typeSelect);*/
         });
         currGroups.setOnAction(actionEvent -> {
             Button close = new Button("Close");
@@ -275,7 +231,7 @@ public class GridPage extends Application{
         Stage.setScene(scene);
         //Stage.show();    Extractor line 302
     }
-    public static Node mergedPanes(Pane p1 , Pane p2,String p1Axis,String p2Axis){
+    public static Node mergedPanes(Pane p1 , Pane p2,String p1Axis,String p2Axis,int [] batches){
         Group root = new Group();
         CheckBox con = new CheckBox("Connect");
         CheckBox select = new CheckBox("Select");
@@ -314,7 +270,7 @@ public class GridPage extends Application{
                 p1.getChildren().add(toAdd);
             }else if(makeConnection){
                 if(myConnector.size() < 2){
-                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),p1Axis);
+                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),p1Axis,batches[0]);
                     myConnector.add(theMainExtratorArr.indexOf(t));
                     if(myConnector.size() == 2) {
                         addSquare(theMainExtratorArr.get(myConnector.get(0)),theMainExtratorArr.get(myConnector.get(1)),p1,p2,p1Axis);
@@ -352,7 +308,7 @@ public class GridPage extends Application{
                 p2.getChildren().add(toAdd);
             }else if(makeConnection){
                 if(myConnector.size() < 2){
-                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),p2Axis);
+                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),p2Axis,batches[1]);
                     myConnector.add(theMainExtratorArr.indexOf(t));
                     if(myConnector.size() == 2) {
                         addSquare(theMainExtratorArr.get(myConnector.get(0)),theMainExtratorArr.get(myConnector.get(1)),p1,p2,p1Axis);
@@ -388,58 +344,11 @@ public class GridPage extends Application{
         sameZ.setOnAction(value ->  {
             putZForSelect(selectedCubes, Integer.parseInt(text.getText()));
         });
-        /*root.getChildren().add(loadAnother);
-        root.getChildren().add(sameZ);
-        root.getChildren().add(text);
-        root.getChildren().add(con);
-        root.getChildren().add(select);
-        root.getChildren().add(cp);
-        ScrollPane bigBox = new ScrollPane();
-        Pane board = new Pane();*/
 
         connectGroups.setOnAction(actionEvent -> {
             makeConnection = !makeConnection;
             GridPage.createOption[0] = -1;
         });
-/*
-        Group info = new Group();
-        Rectangle infoRect = new Rectangle(150,75);
-        Text textInfoX = new Text("X:");textInfoX.setLayoutX(20);
-        textInfoX.setFill(Color.RED);textInfoX.setLayoutY(30);
-        textInfoX.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoY = new Text("Y:");textInfoY.setLayoutX(20);
-        textInfoY.setFill(Color.BLUE);textInfoY.setLayoutY(50);
-        textInfoY.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoZ = new Text("Z:");textInfoZ.setLayoutX(20);
-        textInfoZ.setFill(Color.GREEN);textInfoZ.setLayoutY(70);
-        textInfoZ.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoColor = new Text("Col : ");textInfoColor.setLayoutX(70);
-        textInfoColor.setFill(Color.WHITE);textInfoColor.setLayoutY(70);
-        textInfoColor.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-
-        info.setLayoutX(50);
-        info.setLayoutY(50);
-        infoRect.setFill(Color.GOLD);
-        info.getChildren().add(infoRect);info.getChildren().add(textInfoX);
-        info.getChildren().add(textInfoY);info.getChildren().add(textInfoZ);
-        info.getChildren().add(textInfoColor);
-        //board.getChildren().add(info);
-
-        Rectangle cubeBoard = new Rectangle(1000,175);
-        Text boardText = new Text("all cubes on board");
-        boardText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        boardText.setFill(Color.WHITESMOKE);
-
-        cubeBoard.setFill(Color.BLACK);
-
-        bigBox.setLayoutX(50);
-        bigBox.setLayoutY(410);
-        board.getChildren().add(cubeBoard);board.getChildren().add(boardText);board.getChildren().add(info);
-        boardText.setLayoutY(30);
-        boardText.setLayoutX(20);
-        bigBox.setContent(board);
-        root.getChildren().add(bigBox);
-*/
         root.getChildren().add(createGroups);
         root.getChildren().add(currGroups);
         root.getChildren().add(connectGroups);
@@ -454,7 +363,7 @@ public class GridPage extends Application{
             createOption[0] = 1;
             axis1 = p1Axis;
             axis2 = p2Axis;
-            Group typeSelect = typeOfSelection(root,currGroups,p1,p2);
+            Group typeSelect = typeOfSelection(root,currGroups,p1,p2,batches);
             typeSelect.setLayoutX(870);
             typeSelect.setLayoutY(100);
             currGroups.setLayoutY(280);
@@ -481,7 +390,7 @@ public class GridPage extends Application{
 
         return root;
     }
-    public static Pane exportPane(String axis){
+    public static Pane exportPane(String axis, int batch){
 
         Group root = new Group();
         CheckBox con = new CheckBox("Connect");
@@ -522,7 +431,7 @@ public class GridPage extends Application{
             }else if(makeConnection){
 
                 /**/if(myConnector.size() < 2){
-                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),axis);
+                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),axis,batch);
                     myConnector.add(theMainExtratorArr.indexOf(t));
                     if(myConnector.size() == 2) {
                         Tracker.mergeTrackers(theMainExtratorArr, myConnector.get(0), myConnector.get(1));
@@ -543,7 +452,7 @@ public class GridPage extends Application{
         currPos.myCubes = Extractor.myCubes;
         currPos.axis = GetMyImageAlongAxe.chosenAxe;
         savedArray.add(currPos);
-        addCubeToOneGrid(p1, currPos.axis);
+        addCubeToOneGrid(p1, currPos.axis, batch);
 
         return p1;
     }
@@ -556,31 +465,7 @@ public class GridPage extends Application{
             b.fire();
         }
     }
-    /*
-    public static Group addCubesToBoard(Group info){
-        Rectangle infoRect = new Rectangle(150,75);
-        Text textInfoX = new Text("X:");textInfoX.setLayoutX(20);
-        textInfoX.setFill(Color.RED);textInfoX.setLayoutY(30);
-        textInfoX.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoY = new Text("Y:");textInfoY.setLayoutX(20);
-        textInfoY.setFill(Color.BLUE);textInfoY.setLayoutY(50);
-        textInfoY.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoZ = new Text("Z:");textInfoZ.setLayoutX(20);
-        textInfoZ.setFill(Color.GREEN);textInfoZ.setLayoutY(70);
-        textInfoZ.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-        Text textInfoColor = new Text("Col : ");textInfoColor.setLayoutX(70);
-        textInfoColor.setFill(Color.WHITE);textInfoColor.setLayoutY(70);
-        textInfoColor.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 16));
-
-        info.setLayoutX(50);
-        info.setLayoutY(50);
-        infoRect.setFill(Color.GOLD);
-        info.getChildren().add(infoRect);info.getChildren().add(textInfoX);
-        info.getChildren().add(textInfoY);info.getChildren().add(textInfoZ);
-        info.getChildren().add(textInfoColor);
-        return info;
-    }*/
-    public static Group typeOfSelection(Group p,Button curr,Pane p1,Pane p2){
+    public static Group typeOfSelection(Group p,Button curr,Pane p1,Pane p2,int [] batchs){
         Group g = new Group();
         Text t = new Text("Select your selector :");
         CheckBox byColor = new CheckBox("color");
@@ -614,7 +499,7 @@ public class GridPage extends Application{
                 addLineSection.ajouter.setOnAction(action1 -> {
                     allGroupName.add(inputGroupName.getText());
                     g.getChildren().remove(inputGroupName);
-                    addLineSection.addGroup(addLineSection.polygon,p2);
+                    addLineSection.addGroup(addLineSection.polygon,p2,batchs);
                     g.getChildren().remove(addLineSection.myLin);
                     finish.setLayoutY(120);
                     curr.setLayoutY(250);
@@ -636,7 +521,7 @@ public class GridPage extends Application{
                 SquareSelector.done.setOnAction(actionEvent1 -> {
                     allGroupName.add(inputGroupName.getText());
                     g.getChildren().remove(inputGroupName);
-                    getAllCubeWithin(theMainExtratorArr,startX,startY,endX,endY);
+                    getAllCubeWithin(theMainExtratorArr,startX,startY,endX,endY,batchs);
                     g.getChildren().remove(squareSelect);
                     finish.setLayoutY(120);
                     curr.setLayoutY(250);

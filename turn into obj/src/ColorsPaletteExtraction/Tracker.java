@@ -10,12 +10,13 @@ public class Tracker {
     public double z;
     public String axis;
     public javafx.scene.paint.Color col;
+    public int batch;
 
 
     public Tracker() {
 
     }
-    public static Tracker findClosestTracker(ArrayList<Tracker> list, double targetX, double targetY,String axis) {
+    public static Tracker findClosestTracker(ArrayList<Tracker> list, double targetX, double targetY,String axis,int batch) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Tracker list is null or empty.");
         }
@@ -28,7 +29,7 @@ public class Tracker {
         double minDistance = calculateDistance(targetX, targetY, closestTracker);
 
         for (int i = 1; i < list.size(); i++) {
-            if((list.get(i).axis.equals(axis))&&(list.get(i).x < targetX)&&(list.get(i).y < targetY)){
+            if((list.get(i).axis.equals(axis))&&(list.get(i).x < targetX)&&(list.get(i).y < targetY)&&(list.get(i).batch == batch)){
                 Tracker currentTracker = list.get(i);
                 double distance = calculateDistance(targetX, targetY, currentTracker);
 
@@ -79,11 +80,18 @@ public class Tracker {
         this.col = initCol;
         this.axis = axe;
     }
-
+    public Tracker(double posX, double posY, double posZ, javafx.scene.paint.Color initCol,String axe,int id) {
+        this.x = posX;
+        this.y = posY;
+        this.z = posZ;
+        this.col = initCol;
+        this.axis = axe;
+        this.batch = id;
+    }
     public String printOutString() {
         String s = "";
         if(this.x < 450){
-            s = "-----\nX:"+this.x + " Y:" + this.y + "  Z:" + this.z +" |axis: "+axis/*+ " \nCOL:" + this.col.getRed()*255 +" |"+this.col.getGreen()*255 +" |"+this.col.getBlue()*255 +"\n "+axis*/;
+            s = "-----\nX:"+this.x + " Y:" + this.y + "  Z:" + this.z +" |axis: "+axis +" | batch :"+batch/*+ " \nCOL:" + this.col.getRed()*255 +" |"+this.col.getGreen()*255 +" |"+this.col.getBlue()*255 +"\n "+axis*/;
         }else if(this.x > 450){
             s = "-----\nX:"+(this.x-450) + " Y:" + this.y + "\n Z:" + this.z + " \nCOL:" + this.col.getRed()*255 +" |"+this.col.getGreen()*255 +" |"+this.col.getBlue()*255;
         }

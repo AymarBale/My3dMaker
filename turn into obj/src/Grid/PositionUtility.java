@@ -154,8 +154,8 @@ public class PositionUtility {
         }
     }
 
-    public static void addCubeToOneGrid(Pane p1,String axis){
-
+    public static void addCubeToOneGrid(Pane p1,String axis,int id){
+        int count = 0;
         Pane p = p1;
         int selectedAxis = 0;
         ArrayList <Tracker> receivedCubes = savedArray.get(savedArray.size()-1).myCubes;
@@ -169,10 +169,10 @@ public class PositionUtility {
             p.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).x + selectedAxis, transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).y+plusForEarPig, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
             arrCol.add(c);
             allColArr.add(receivedCubes.get(i).col);
-            theMainExtratorArr.add(new Tracker(transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).x + selectedAxis,transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).y+plusForEarPig,0,c,axis));
+            theMainExtratorArr.add(new Tracker(transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).x + selectedAxis,transformPosition(savedArray.get(savedArray.size()-1).myCubes).get(i).y+plusForEarPig,0,c,axis,id));
+            count += 1;
         }
         arrCol = (ArrayList<Color>) uniqueColors(arrCol);
-
     }
 
     public static ArrayList<Tracker> transformPosition(ArrayList<Tracker> receivedCubes){
@@ -215,8 +215,7 @@ public class PositionUtility {
 
     public static void printArrayList(ArrayList<Tracker> arr){
         for (int i = 0; i < arr.size(); i++) {
-            //System.out.println("("+arr.get(i).getRed()*255 + ")"+"("+arr.get(i).getGreen()*255 + ")"+"("+arr.get(i).getBlue()*255 + ")"+i);
-            System.out.println("<---\n"+arr.get(i).x+" \n"+arr.get(i).y+"\n"+arr.get(i).z+"\n--->");
+            System.out.println(arr.get(i).batch +"  "+arr.get(i).z);
         }
     }
 
@@ -229,24 +228,21 @@ public class PositionUtility {
         return new Color(red/255, green/255, blue/255, alpha);
     }
 
-    public static void getAllCubeWithin(ArrayList <Tracker> theMainExtratorArr,double sX,double sY,double eX,double eY){
+    public static void getAllCubeWithin(ArrayList <Tracker> theMainExtratorArr,double sX,double sY,double eX,double eY,int [] batchs){
         ArrayList <Tracker> t = new ArrayList<>();
         int num = 0;
-
         for (int i = 0; i < theMainExtratorArr.size(); i++) {
             double tempSX = sX;  // Temporary variable for modified sX
             double tempEX = eX;
-            if(theMainExtratorArr.get(i).axis.equals(String.valueOf(EditorSettings.mergedAxe.charAt(0)))){
-
+            if(theMainExtratorArr.get(i).batch == batchs[0]){
                 if((theMainExtratorArr.get(i).x >= tempSX)&(theMainExtratorArr.get(i).y >= sY)&(theMainExtratorArr.get(i).x <= tempEX)&(theMainExtratorArr.get(i).y <= eY)
-                &(theMainExtratorArr.get(i).x != 0)){
+                &(theMainExtratorArr.get(i).x != 0)&(theMainExtratorArr.get(i).batch == batchs[0])){
                     num += 1;
                     t.add(theMainExtratorArr.get(i));
                 }
-            }else if(theMainExtratorArr.get(i).axis.equals(String.valueOf(EditorSettings.mergedAxe.charAt(1)))){
+            }else if(theMainExtratorArr.get(i).batch == batchs[1]){
                 tempSX -= 450.00;
                 tempEX -= 450.00;
-
                 if((theMainExtratorArr.get(i).x >= tempSX)&(theMainExtratorArr.get(i).y >= sY)&(theMainExtratorArr.get(i).x <= tempEX)&(theMainExtratorArr.get(i).y <= eY)
                         &(theMainExtratorArr.get(i).x != 0)){
                     num += 1;
@@ -284,16 +280,20 @@ public class PositionUtility {
             int finalI = i;
             applyX.setOnAction(actionEvent -> {
                 setAllX(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(arrLOfGroup.indexOf(current)));
+
             });
             applyZ.setOnAction(actionEvent -> {
                 setAllZ(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(arrLOfGroup.indexOf(current)));
+
             });
             t_Input.setLayoutY(70);
             applyChange.setLayoutY(90);
             applyChange.setOnAction(actionEvent -> {
                 findAndReplace(theMainExtratorArr,arrLOfGroup.get(arrLOfGroup.indexOf(current)),arrLOfGroup.get(arrLOfGroup.indexOf(current)).get(0).axis);
                 mainGroup.getChildren().remove(g);
+
                 Tracker.removeSimilarList(arrLOfGroup,current);
+
             });
             g.getChildren().add(t_Input);
             g.setLayoutX(870);
@@ -323,7 +323,7 @@ public class PositionUtility {
     public static void findAndReplace(ArrayList <Tracker> arr1,ArrayList<Tracker> arr2,String axis){
         for (int i = 0; i < arr1.size(); i++) {
             for (int j = 0; j < arr2.size(); j++) {
-                if((arr1.get(i).x == arr2.get(j).x)&(arr1.get(i).y == arr2.get(j).y)&(arr1.get(i).axis.equals(arr2.get(j).axis))){
+                if((arr1.get(i).x == arr2.get(j).x)&(arr1.get(i).y == arr2.get(j).y)&(arr1.get(i).axis.equals(arr2.get(j).axis))&(arr1.get(i).batch == arr2.get(j).batch)){
                     arr1.set(i,arr2.get(j));
                 }
             }

@@ -39,7 +39,7 @@ public class GetMyImageAlongAxe extends Application {
         });
         butX.setOnAction(event -> {
             butX.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";
+            //path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";
             chosenAxe = "X";
         });
         butY.setOnAction(event -> {
@@ -48,7 +48,7 @@ public class GetMyImageAlongAxe extends Application {
         });
         butZ.setOnAction(event -> {
             butZ.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";
+            //path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";
             chosenAxe = "Z";
         });
 
@@ -62,7 +62,7 @@ public class GetMyImageAlongAxe extends Application {
                 e.start(secondWindow);
                 secondWindow.setTitle("extractor Test page");
                 secondWindow.show();
-                Extractor.QuickShort(secondWindow);
+                //Extractor.QuickShort(secondWindow);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -81,9 +81,6 @@ public class GetMyImageAlongAxe extends Application {
         Application.launch(args);
     }
     public static void QuickSort(Button b,Stage s)  {
-
             b.fire();
-
-
     }
 }

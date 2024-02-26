@@ -1,6 +1,11 @@
-left x = 3,nez = 1,eyes + skin = 2
+left x = 3,nez = 1,eyes + skin = 2,ear = 4
+do the connection with the right
+ear of right to front of left
+right x = 2, z = 1 ears ,feets = 3
+left back = 8
+right back = 8
+ear of right to back of left
 
-right z = 1 ears ,feets = 3
 thing left to do{
  -group and rules
  -line selector
@@ -8,4 +13,6 @@ thing left to do{
  -simili
  -axe button come back when clicked again
  -close window disappear tab
+ -multiple submit
 }
+

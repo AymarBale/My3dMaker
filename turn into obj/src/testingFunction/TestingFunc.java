@@ -1,5 +1,9 @@
 package testingFunction;
+import ImageTaker.AdvanceTab;
+import ImageTaker.GetMyImageAlongAxe;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -14,6 +18,9 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static Editor.EditorSettings.extractAxis;
 
 public class TestingFunc extends Application {
 
@@ -90,6 +97,10 @@ public class TestingFunc extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+
+
+
 
     private void handleMouseClick(MouseEvent event) {
         lastMouseEvent = event; // Update the last MouseEvent

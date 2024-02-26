@@ -26,6 +26,7 @@ import static Grid.PositionUtility.printList;
 
 public class LineSelector {
     public Group myLin = new Group();
+
     private List<Circle> points = new ArrayList<>();
     private List<Line> lines = new ArrayList<>();
     private Pane pointsLinePane;
@@ -291,11 +292,11 @@ public class LineSelector {
         return false;
     }
 
-    public void addGroup(Polygon polygon, Pane rectanglePane){
+    public void addGroup(Polygon polygon, Pane rectanglePane,int [] batchs){
         if (!isValidPolygon()) {
-            checkOverLap();
+            checkOverLap(batchs);
         }else {
-            checkOverLapPolygon(polygon,rectanglePane);
+            checkOverLapPolygon(polygon,rectanglePane,batchs);
         }
     }
     private List<Circle> orderPointsByDistance(List<Circle> points) {
@@ -379,16 +380,16 @@ public class LineSelector {
         return connectedLines;
     }
 
-    public void checkOverLapPolygon(Polygon polygon, Pane rectanglePane) {
+    public void checkOverLapPolygon(Polygon polygon, Pane rectanglePane,int [] batchs) {
         ArrayList <Tracker> t = new ArrayList<>();
         for (int i = 0; i < theMainExtratorArr.size(); i++) {
-            if(theMainExtratorArr.get(i).axis.equals(axis1)){
+            if(theMainExtratorArr.get(i).batch == batchs[0]){
                 if(isRectangleInsidePolygon(theMainExtratorArr.get(i).x,
                         theMainExtratorArr.get(i).y,10,polygon)){
                     t.add(theMainExtratorArr.get(i));
                 }
             }
-            if(theMainExtratorArr.get(i).axis.equals(axis2)){
+            if(theMainExtratorArr.get(i).batch == batchs[1]){
                 if(isRectangleInsidePolygon(theMainExtratorArr.get(i).x+450,
                         theMainExtratorArr.get(i).y,10,polygon)){
                     t.add(theMainExtratorArr.get(i));
@@ -400,7 +401,7 @@ public class LineSelector {
         }
     }
 
-    public void checkOverLap(){
+    public void checkOverLap(int [] batchs){
         ArrayList <Tracker> t = new ArrayList<>();
         String axe = "";
         int l = 0;
@@ -411,12 +412,12 @@ public class LineSelector {
             axe = axis2;
         }
         for (int i = 0; i < theMainExtratorArr.size(); i++) {
-            if(theMainExtratorArr.get(i).axis.equals(axis1)){
+            if(theMainExtratorArr.get(i).batch == batchs[0]){
                 if (isTrackerBetweenPoints(theMainExtratorArr.get(i),axe,l)) {
                     t.add(theMainExtratorArr.get(i));
                 }
             }
-            if(theMainExtratorArr.get(i).axis.equals(axis2)){
+            if(theMainExtratorArr.get(i).batch == batchs[1]){
                 if (isTrackerBetweenPoints(theMainExtratorArr.get(i),axe,l)) {
                     t.add(theMainExtratorArr.get(i));
                 }

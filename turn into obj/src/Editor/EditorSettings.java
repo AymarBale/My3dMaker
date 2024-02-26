@@ -1,6 +1,7 @@
 package Editor;
 
 import Grid.GridPage;
+import ImageTaker.AdvanceTab;
 import ImageTaker.GetMyImageAlongAxe;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -34,12 +35,10 @@ public class EditorSettings extends Application {
     public static Button btn = new Button("+");
     public static AtomicReference<Tab> addedTab = new AtomicReference<>(new Tab());
     public static String mergedAxe = "";
+    public static int batchCount = 11;
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Multiple Tab Window");
-
-
-
         int i = 0;
         AtomicInteger finalI = new AtomicInteger(i);
 
@@ -72,8 +71,8 @@ public class EditorSettings extends Application {
 
 
 
-    public static Tab createTab(AtomicInteger i,TabPane tabPane,Stage a){
-        Tab tab = new Tab("Tab  "+ i);
+    public static AdvanceTab createTab(AtomicInteger i, TabPane tabPane, Stage a){
+        AdvanceTab tab = new AdvanceTab("Tab  "+ i);
         Stage s = new Stage();
         GetMyImageAlongAxe g = new GetMyImageAlongAxe();
         g.start(s);
@@ -81,8 +80,6 @@ public class EditorSettings extends Application {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem merge = new MenuItem("merge");
         MenuItem mSplit = new MenuItem("Split");
-
-
 
         merge.setOnAction((event) -> {
             listenForMerge = true;
@@ -104,13 +101,18 @@ public class EditorSettings extends Application {
                 tabPane.getTabs().remove(tabPane.getTabs().indexOf(newTab));
                 if(oldTab != null){
                     arrL.clear();
+                    if (oldTab instanceof AdvanceTab) {
+                        ((AdvanceTab) oldTab).mergeBatch[0] = ((AdvanceTab) oldTab).batch;
+                        ((AdvanceTab) oldTab).mergeBatch[1] = ((AdvanceTab) newTab).batch;
+
+                    }
                     arrL.add(oldTab.getText());
                     arrL.add(newTab.getText());
                     tabPane.setPrefSize(1100,600);
                     oldTab.setText(oldTab.getText()+" + "+newTab.getText());
                     mergedAxe = extractCharacter(oldTab.getText())+extractCharacter(newTab.getText());
                     oldTab.setContent(new Pane());
-                    oldTab.setContent(GridPage.mergedPanes(p1, p2,p1Axis,p2Axis));/**/
+                    oldTab.setContent(GridPage.mergedPanes(p1, p2,p1Axis,p2Axis,((AdvanceTab) oldTab).mergeBatch));/**/
                     oldTab.setStyle("-fx-text-base-color: green;");
                     a.setWidth(1100);
                     btn.setLayoutX(1050);

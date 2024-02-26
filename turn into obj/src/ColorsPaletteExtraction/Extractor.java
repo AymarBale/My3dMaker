@@ -2,6 +2,7 @@ package ColorsPaletteExtraction;
 
 import Editor.EditorSettings;
 import Grid.GridPage;
+import ImageTaker.AdvanceTab;
 import ImageTaker.GetMyImageAlongAxe;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -205,7 +206,6 @@ public class Extractor extends Application {
             }
             initY+= additiveX;
         }
-
     }
 
     public static void MakeCube(double x,double y){
@@ -294,9 +294,12 @@ public class Extractor extends Application {
 
     private static void openSecondStage(Stage innerStage) throws Exception {
         innerStage.close();
-        Tab myTab = EditorSettings.tabPane.getTabs().get(EditorSettings.tabPane.getTabs().size()-1);
+        AdvanceTab myTab = (AdvanceTab) EditorSettings.tabPane.getTabs().get(EditorSettings.tabPane.getTabs().size()-1);
         myTab.setText(myTab.getText()+" AXIS:"+GetMyImageAlongAxe.chosenAxe);
-        myTab.setContent(GridPage.exportPane(GetMyImageAlongAxe.chosenAxe));
+        myTab.batch = EditorSettings.batchCount;
+        myTab.setContent(GridPage.exportPane(GetMyImageAlongAxe.chosenAxe,myTab.batch));
+        EditorSettings.batchCount += 11;
+
         ResetVariables();
 
     }
