@@ -28,6 +28,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static Editor.EditorSettings.tabPane;
+
 public class Extractor extends Application {
     public static int myGridSizeX = 10;
     public static int myGridSizeY = 10;
@@ -147,11 +149,8 @@ public class Extractor extends Application {
         root.getChildren().add(jo);
         root.getChildren().add(rectGroup);
 
-        // Create a Scene with the StackPane as the root node
         Scene scene = new Scene(root, image.getWidth()*3, image.getHeight()*1.5);
 
-
-        // Set up an event handler to get the color of a pixel when the user clicks on the image
         imageView.setOnMouseClicked(event -> {
             double x = event.getX();
             double y = event.getY();
@@ -182,12 +181,18 @@ public class Extractor extends Application {
 
                 };
         });
+        stage.setOnCloseRequest(event -> {
+            if (!tabPane.getTabs().isEmpty()) {
+                tabPane.getTabs().remove(tabPane.getTabs().size() - 1);
+                if(EditorSettings.i >= 0)
+                EditorSettings.i -= 1;
+            }
+        });
 
         // Set the scene in the primary stage
         stage.setScene(scene);
         stage.setTitle("Pixel Color Viewer with Rectangle");
         stage.show();
-
     }
 
     public static void GridL(double x,double y,int xGrid,int yGrid){
@@ -294,14 +299,12 @@ public class Extractor extends Application {
 
     private static void openSecondStage(Stage innerStage) throws Exception {
         innerStage.close();
-        AdvanceTab myTab = (AdvanceTab) EditorSettings.tabPane.getTabs().get(EditorSettings.tabPane.getTabs().size()-1);
+        AdvanceTab myTab = (AdvanceTab) tabPane.getTabs().get(tabPane.getTabs().size()-1);
         myTab.setText(myTab.getText()+" AXIS:"+GetMyImageAlongAxe.chosenAxe);
         myTab.batch = EditorSettings.batchCount;
         myTab.setContent(GridPage.exportPane(GetMyImageAlongAxe.chosenAxe,myTab.batch));
         EditorSettings.batchCount += 11;
-
         ResetVariables();
-
     }
 
     public static void ResetVariables(){

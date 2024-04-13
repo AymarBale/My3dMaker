@@ -1,6 +1,7 @@
 package ImageTaker;
 
 import ColorsPaletteExtraction.Extractor;
+import Editor.EditorSettings;
 import Grid.GridPage;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -12,6 +13,8 @@ import javafx.scene.control.Button;
 
 import java.awt.*;
 import java.io.File;
+
+import static Editor.EditorSettings.tabPane;
 
 public class GetMyImageAlongAxe extends Application {
     public Button importer = new Button(" IMPORT ");
@@ -26,7 +29,7 @@ public class GetMyImageAlongAxe extends Application {
         Button chooseFile = new Button("Choose the file you want ");
 
         FileChooser fileChooser = new FileChooser();
-        Button butX = new Button("AxeX");Button butY = new Button("AxeXZ");Button butZ = new Button("AxeZ");
+        Button butX = new Button("AxeX");Button butY = new Button("AxeY");Button butZ = new Button("AxeZ");
         butX.setStyle("-fx-font-size: 2em;");butY.setStyle("-fx-font-size: 2em;");butZ.setStyle("-fx-font-size: 2em;");
         butX.setLayoutY(250);butY.setLayoutY(250);butZ.setLayoutY(250);
         butX.setLayoutX(200);butY.setLayoutX(300);butZ.setLayoutX(400);
@@ -39,17 +42,23 @@ public class GetMyImageAlongAxe extends Application {
         });
         butX.setOnAction(event -> {
             butX.setLayoutY(375);
-            //path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";
             chosenAxe = "X";
+            butY.setLayoutY(250);
+            butZ.setLayoutY(250);
         });
         butY.setOnAction(event -> {
             butY.setLayoutY(375);
             chosenAxe = "Y";
+            butX.setLayoutY(250);
+            butZ.setLayoutY(250);
         });
         butZ.setOnAction(event -> {
             butZ.setLayoutY(375);
-            //path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";
             chosenAxe = "Z";
+            butX.setLayoutY(250);
+            butY.setLayoutY(250);
         });
 
         importer.setOnAction(event -> {
@@ -66,6 +75,14 @@ public class GetMyImageAlongAxe extends Application {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        });
+        stage.setOnCloseRequest(event -> {
+            if (!tabPane.getTabs().isEmpty()) {
+                tabPane.getTabs().remove(tabPane.getTabs().size() - 1);
+                if(EditorSettings.i >= 0)
+                EditorSettings.i -= 1;
+            }
+            // You can perform further actions here
         });
         root.getChildren().add(butX);root.getChildren().add(butY);root.getChildren().add(butZ);
         root.getChildren().add(line);

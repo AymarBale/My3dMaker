@@ -1,315 +1,164 @@
 package testingFunction;
-import ImageTaker.AdvanceTab;
-import ImageTaker.GetMyImageAlongAxe;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.MouseButton;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Polygon;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static Editor.EditorSettings.extractAxis;
+import static Grid.PositionUtility.printList;
 
-public class TestingFunc extends Application {
+public class TestingFunc extends Application{
 
-    private List<Circle> points = new ArrayList<>();
-    private List<Line> lines = new ArrayList<>();
-    private Pane pointsLinePane;
-    private Pane root;
-    private Circle selectedCircle;
-    private Line tempLine;
-    private boolean isDragging = false;
-    private boolean checkPosition = false;
-    public Polygon polygon ;
-
-    private MouseEvent lastMouseEvent;
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    private void removeLinesConnectedToCircle(Circle circle) {
-        List<Line> linesToRemove = new ArrayList<>();
-
-        for (Line line : lines) {
-            double startX = line.getStartX();
-            double startY = line.getStartY();
-            double endX = line.getEndX();
-            double endY = line.getEndY();
-
-            if (approxEqual(startX, circle.getCenterX()) && approxEqual(startY, circle.getCenterY()) ||
-                    approxEqual(endX, circle.getCenterX()) && approxEqual(endY, circle.getCenterY())) {
-                linesToRemove.add(line);
-            }
-        }
-
-        // Remove the lines connected to the deleted circle
-        lines.removeAll(linesToRemove);
-        root.getChildren().removeAll(linesToRemove);
-    }
-
-    private boolean approxEqual(double a, double b) {
-        return Math.abs(a - b) < 0.001; // Adjust the threshold as needed
-    }
+    public static List<Circle> points = new ArrayList<>();
+    public static List<Line> lines = new ArrayList<>();
+    public static ArrayList<Text> textArray = new ArrayList<>();
+    public static int circleCount = 0;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Click Points with Lines");
-        Button checkPos = new Button("checkMyPos");
-        Button removePoly = new Button("Remove polygon");
-        removePoly.setLayoutX(490);
-        root = new Pane();
-        Circle c = new Circle(10);
-        c.setFill(Color.GOLD);
-        c.setCenterX(400);
-        c.setCenterY(300);
-        pointsLinePane = new Pane();
-        root.getChildren().addAll(pointsLinePane, checkPos,removePoly,c);
-        Scene scene = new Scene(root, 600, 400);
+        // Create a Pane to hold the shapes
+        Pane pane = new Pane();
+        //TestingFunc a = new TestingFunc();
+        // Add circles with specified positions to the list
+        points.add(createCircle(25.0, 25.0));
+        points.add(createCircle(55.0, 25.0));
+        points.add(createCircle(55.0, 55.0));
+        points.add(createCircle(85.0, 55.0));
+        points.add(createCircle(85.0, 85.0));
+        points.add(createCircle(25.0, 85.0));
+        points.add(createCircle(95.0, 25.0));
+        points.add(createCircle(95.0, 35.0));
 
-        checkPos.setOnAction(e -> {
-            checkPosition = true;
-            CreatePolygon();
-            System.out.println(checkOverlap(polygon,c));
-        });
+        lines.add(createLine(25.0, 25.0, 25.0, 85.0));
+        lines.add(createLine(25.0, 85.0, 85.0, 85.0));
+        lines.add(createLine(85.0, 85.0, 85.0, 55.0));
+        lines.add(createLine(85.0, 55.0, 55.0, 55.0));
 
-        removePoly.setOnAction(e ->{
-            checkPosition = false;
-            polygon = null;
-        });
+        lines.add(createLine(55.0, 55.0, 55.0, 25.0));
+        lines.add(createLine(55.0, 25.0, 25.0, 25.0));
+        lines.add(createLine(55.0, 25.0, 95.0, 25.0));
+        lines.add(createLine(95.0, 25.0, 95.0, 35.0));
+        /*addCircleAndLines();
+        circles = (ArrayList<Circle>) orderPointsByDistance(circles);
+        addCircleAndLines();*/
+        // Add circles and lines to the pane
 
-        scene.setOnMousePressed(this::handleMousePressed);
-        scene.setOnMouseDragged(this::handleMouseDragged);
-        scene.setOnMouseReleased(this::handleMouseReleased);
-        scene.setOnMouseClicked(this::handleMouseClick);
+        pane.getChildren().addAll(points);
+        pane.getChildren().addAll(lines);
+        pane.getChildren().addAll(textArray);
 
+        // Create a scene and add the pane to it
+        Scene scene = new Scene(pane, 200, 200);
+        System.out.println(isValidPolygon());
+        // Set the stage title and scene, then show the stage
+        primaryStage.setTitle("JavaFX Shapes");
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 
-
-
-
-
-    private void handleMouseClick(MouseEvent event) {
-        lastMouseEvent = event; // Update the last MouseEvent
-        double x = event.getX();
-        double y = event.getY();
-
-        if (event.getButton() == MouseButton.PRIMARY) {
-            // Left mouse button clicked
-            if (checkPosition) {
-                System.out.println(" if is inside :"+isPointInsidePolygon(x,y));
-            } else {
-                handleLeftMouseClick(x, y);
-            }
-        } else if (event.getButton() == MouseButton.SECONDARY) {
-            // Right mouse button clicked
-            handleRightMouseClick(x, y);
-        }
+    public static void main(String[] args) {
+        launch(args);
     }
-
-    private void handleLeftMouseClick(double x, double y) {
-        if (!checkPosition) {
-            // Check if the click is on an existing circle
-            Circle clickedCircle = getClickedCircle(x, y);
-            if (clickedCircle == null) {
-                // Create a new circle at the clicked position
-                Circle circle = new Circle(x, y, 5, Color.BLUE);
-                root.getChildren().add(circle);
-                points.add(circle);
-                connectPointsWithLines();
-            } else {
-                selectedCircle = clickedCircle;
-            }
-        }
-    }
-
-    private void handleRightMouseClick(double x, double y) {
-        if (!checkPosition) {
-            // Handle right mouse click logic here
-            // For example, remove a circle or perform a specific action
-            Circle clickedCircle = getClickedCircle(x, y);
-            if (clickedCircle != null) {
-                // Remove the clicked circle
-                root.getChildren().remove(clickedCircle);
-                points.remove(clickedCircle);
-
-                // Remove lines connected to the deleted circle
-                removeLinesConnectedToCircle(clickedCircle);
-
-                // Redraw remaining points and lines
-                connectPointsWithLines();
-            }
-        }
-    }
-
-    private void handleMousePressed(MouseEvent event) {
-        lastMouseEvent = event; // Update the last MouseEvent
-        double x = event.getX();
-        double y = event.getY();
-
-        if (event.getButton() == MouseButton.PRIMARY) {
-            // Check if the left mouse button is pressed
-            selectedCircle = getClickedCircle(x, y);
-            if (selectedCircle != null) {
-                tempLine = new Line(selectedCircle.getCenterX(), selectedCircle.getCenterY(), x, y);
-                root.getChildren().add(tempLine);
-            }
-            isDragging = false;
-        }
-    }
-
-    private void handleMouseDragged(MouseEvent event) {
-        if (isLeftMouseButtonPressed()) { // Check if the left mouse button is pressed
-            if (selectedCircle != null && tempLine != null) {
-                double x = event.getX();
-                double y = event.getY();
-
-                tempLine.setEndX(x);
-                tempLine.setEndY(y);
-                isDragging = true; // Set the drag flag
-            }
-        }
-    }
-
-    private void handleMouseReleased(MouseEvent event) {
-        if (isLeftMouseButtonPressed()) { // Check if the left mouse button is pressed
-            double x = event.getX();
-            double y = event.getY();
-
-            Circle targetCircle = getClickedCircle(x, y);
-            if (selectedCircle != null && tempLine != null) {
-                root.getChildren().remove(tempLine);
-                tempLine = null;
-
-                if (targetCircle != null && targetCircle != selectedCircle) {
-                    drawLineBetweenCircles(selectedCircle, targetCircle);
-                } else {
-                    // Create a new circle at the release position
-                    Circle newCircle = new Circle(x, y, 5, Color.BLUE);
-                    root.getChildren().add(newCircle);
-                    points.add(newCircle);
-                    connectPointsWithLines();
+    public static String isValidPolygon() {
+        ArrayList<Points> arr = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) {
+            Points myPoint = new Points(i+"");
+            Circle currCircle = points.get(i);
+            for (int j = 0; j < points.size(); j++) {
+                if(points.get(j)!= currCircle){
+                    if(areConnected(currCircle,points.get(j),lines)){
+                        if(myPoint.connectedTo.equals("")){
+                            myPoint.connectedTo += j+"";
+                        }else{
+                            myPoint.connectedTo += ","+j;
+                        }
+                    };
                 }
             }
+            arr.add(myPoint);
         }
-    }
+        ArrayList<String> polygon = findPolygon(arr);
+        if (polygon != null) {
+            return polygon.toString();
+        } else {
+            return "";
+        }
 
-    private boolean isLeftMouseButtonPressed() {
-        return lastMouseEvent != null && lastMouseEvent.getButton() == MouseButton.PRIMARY;
     }
+    private static Circle createCircle(double centerX, double centerY) {
+        Circle circle = new Circle(centerX, centerY, 5, Color.BLACK);
+        Text text = new Text(""+circleCount);
+        text.setStyle("-fx-text-fill: red; -fx-font-size: 16px;");
+        text.setLayoutX(centerX);
+        text.setLayoutY(centerY);
+        textArray.add(text);
+        circleCount++;
+        return circle;
+    }
+    private static Line createLine(double startX, double startY, double endX, double endY) {
+        Line line = new Line(startX, startY, endX, endY);
+        line.setStroke(Color.BLACK);
+        return line;
+    }
+    static ArrayList<String> findPolygon(ArrayList<Points> pointsList) {
+        HashMap<String, HashSet<String>> graph = new HashMap<>();
 
-    private Circle getClickedCircle(double x, double y) {
-        for (Circle circle : points) {
-            if (circle.contains(x, y)) {
-                return circle;
+        // Build the graph from the given points list
+        for (Points point : pointsList) {
+            String[] connectedPoints = point.connectedTo.split(",");
+            HashSet<String> connections = new HashSet<>();
+            for (String connectedPoint : connectedPoints) {
+                connections.add(connectedPoint);
+            }
+            graph.put(point.nom, connections);
+        }
+        // Perform depth-first search (DFS) to find a cycle
+        HashSet<String> visited = new HashSet<>();
+        for (Points point : pointsList) {
+            if (!visited.contains(point.nom)) {
+                ArrayList<String> cycle = new ArrayList<>();
+                if (hasCycle(graph, point.nom, null, visited, cycle)) {
+                    return cycle;
+                }
             }
         }
         return null;
     }
 
-    private void drawLineBetweenCircles(Circle start, Circle end) {
-        Line line = new Line(start.getCenterX(), start.getCenterY(), end.getCenterX(), end.getCenterY());
-        lines.add(line);
-        root.getChildren().add(line);
-    }
-
-    private void connectPointsWithLines() {
-        root.getChildren().remove(pointsLinePane);
-        pointsLinePane.getChildren().clear(); // Clear previous points and lines
-
-        // Add circles for each point
-        pointsLinePane.getChildren().addAll(points);
-
-        // Draw lines between points
-        for (Line line : lines) {
-            pointsLinePane.getChildren().add(line);
-        }
-
-        // Add pointsLinePane to root
-        root.getChildren().add(0, pointsLinePane);
-    }
-
-    private void CreatePolygon() {
-        polygon = new Polygon();
-        if (points.size() < 3) {
-            System.out.println("not enough points");
-            return;
-        }
-
-        points = orderPointsByDistance(points);
-
-        for (Circle circle : points) {
-            List<Line> connectedLines = getConnectedLines(circle);
-            if (connectedLines.size() > 1) {
-                polygon.getPoints().addAll(circle.getCenterX(), circle.getCenterY());
-            }
-        }
-        polygon.setFill(Color.BLUE);
-        polygon.setStroke(Color.GOLD);
-        root.getChildren().add(polygon);
-    }
-
-    private List<Circle> orderPointsByDistance(List<Circle> points) {
-        List<Circle> orderedPoints = new ArrayList<>();
-
-        if (points.isEmpty()) {
-            return orderedPoints; // Return an empty list if there are no points
-        }
-        int Psize = points.size();
-
-        orderedPoints.add(points.get(0)); // Add the first point to the ordered list
-        points.remove(points.get(0));
-        for (int i = 1; i < Psize; i++) {
-            Circle currentPoint = orderedPoints.get(i - 1);
-            Circle closestPoint = findClosestCircle(currentPoint, points,lines);
-
-            if (closestPoint != null) {
-                orderedPoints.add(closestPoint);
-
-                points.remove(closestPoint);
-            }else {
-                orderedPoints.add(currentPoint);
-            }
-        }
-
-        return orderedPoints;
-    }
-
-    private Circle findClosestCircle(Circle targetCircle, List<Circle> circles, List<Line> lines) {
-        if (circles.isEmpty() || lines.isEmpty()) {
-            return null; // Return null if the list of circles or lines is empty
-        }
-
-        Circle closestCircle = null;
-        double minDistance = Double.MAX_VALUE;
-
-        for (Circle circle : circles) {
-            if (areConnected(targetCircle, circle, lines)) {
-                double distance = distanceBetweenCircles(targetCircle, circle);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestCircle = circle;
+    static boolean hasCycle(HashMap<String, HashSet<String>> graph, String current, String parent, HashSet<String> visited, ArrayList<String> cycle) {
+        visited.add(current);
+        cycle.add(current);
+        HashSet<String> neighbors = graph.get(current);
+        if (neighbors != null) {
+            for (String neighbor : neighbors) {
+                if (!neighbor.equals(parent)) {
+                    if (visited.contains(neighbor)) {
+                        // Found a cycle
+                        cycle.add(neighbor);
+                        return true;
+                    } else {
+                        if (hasCycle(graph, neighbor, current, visited, cycle)) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
-
-        return closestCircle;
+        cycle.remove(current);
+        return false;
     }
 
-    private boolean areConnected(Circle circle1, Circle circle2, List<Line> lines) {
+    private static boolean areConnected(Circle circle1, Circle circle2, List<Line> lines) {
         for (Line line : lines) {
             if ((line.getStartX() == circle1.getCenterX() && line.getStartY() == circle1.getCenterY() &&
                     line.getEndX() == circle2.getCenterX() && line.getEndY() == circle2.getCenterY()) ||
@@ -320,47 +169,23 @@ public class TestingFunc extends Application {
         }
         return false;
     }
+}
 
-    private double distanceBetweenCircles(Circle circle1, Circle circle2) {
-        double deltaX = circle2.getCenterX() - circle1.getCenterX();
-        double deltaY = circle2.getCenterY() - circle1.getCenterY();
-        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+class Points {
+    String nom;
+    String connectedTo = "";
+
+    public Points() {
+
     }
-    private boolean isPointInsidePolygon(double px, double py) {
-        return polygon.contains(px, py);
+    public Points(String nom) {
+        this.nom = nom;
     }
-
-    private List<Line> getConnectedLines(Circle circle) {
-        List<Line> connectedLines = new ArrayList<>();
-        for (Line line : lines) {
-            if (line.getStartX() == circle.getCenterX() && line.getStartY() == circle.getCenterY() ||
-                    line.getEndX() == circle.getCenterX() && line.getEndY() == circle.getCenterY()) {
-                connectedLines.add(line);
-            }
-        }
-        return connectedLines;
+    public Points(String nom, String connect) {
+        this.nom = nom;
+        this.connectedTo = connect;
     }
-
-    private boolean checkOverlap(Polygon polygon, Circle circle) {
-        // Check if any part of the polygon intersects with the circle
-        if (polygon.getBoundsInParent().intersects(circle.getBoundsInParent())) {
-            return true;
-        }
-
-        // Check if any vertex of the polygon is inside the circle
-        List<Double> points = polygon.getPoints();
-        int size = points.size();
-
-        for (int i = 0; i < size; i += 2) {
-            double x = points.get(i);
-            double y = points.get(i + 1);
-
-            if (circle.contains(x, y)) {
-                return true;
-            }
-        }
-
-        return false;
+    public void print(){
+        System.out.println(nom +" "+ connectedTo);
     }
-
 }

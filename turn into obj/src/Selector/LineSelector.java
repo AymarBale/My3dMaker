@@ -2,6 +2,7 @@ package Selector;
 
 import ColorsPaletteExtraction.Tracker;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -17,11 +18,10 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static Grid.GridPage.*;
+import static Grid.PositionUtility.printLineList;
 import static Grid.PositionUtility.printList;
 
 public class LineSelector {
@@ -38,6 +38,7 @@ public class LineSelector {
     public Polygon polygon ;
     private MouseEvent lastMouseEvent;
     public Button ajouter = new Button("ajouter les cubes");
+    ArrayList<Circle> additional = new ArrayList<>();
     public LineSelector(){
         Text t = new Text("Click left to place the point\n" +
                 " and click right to delete them");
@@ -247,14 +248,18 @@ public class LineSelector {
             return;
         }
         List<Circle> oriPoints = new ArrayList<>(points);
-        points = orderPointsByDistance(points);
-        for (Circle circle : points) {
-            List<Line> connectedLines = getConnectedLines(circle);
-            if (connectedLines.size() > 1) {
-                polygon.getPoints().addAll(circle.getCenterX(), circle.getCenterY());
+        if(isValidPolygon() != null){
+            points = orderPointsByDistance(points);
+            ArrayList<Integer> polyPoints = isValidPolygon();
+            for (int i = 0; i < points.size(); i++) {
+                for (int j = 0; j < polyPoints.size(); j++) {
+                    if(polyPoints.get(j) == i){
+                        polygon.getPoints().addAll(points.get(i).getCenterX(), points.get(i).getCenterY());
+                    }
+                }
             }
-        }
-        if (!isValidPolygon()) {
+        }else if (isValidPolygon() == null) {
+            points = orderPointsByDistance(points);
             points = new ArrayList<>(oriPoints);
             System.out.println("The points are not connected in a way that allows a polygon to be made.");
             return;
@@ -263,37 +268,37 @@ public class LineSelector {
         polygon.setStroke(Color.GOLD);
         root.getChildren().add(polygon);
     }
+    //The points are not connected in a way that allows a polygon to be made.
+    private ArrayList<Integer> isValidPolygon() {
+        ArrayList<Points> arr = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) {
+            Points myPoint = new Points(i+"");
+            Circle currCircle = points.get(i);
+            for (int j = 0; j < points.size(); j++) {
+                if(points.get(j)!= currCircle){
+                    if(areConnected(currCircle,points.get(j),lines)){
+                        if(myPoint.connectedTo.equals("")){
+                            myPoint.connectedTo += j+"";
+                        }else{
+                            myPoint.connectedTo += ","+j;
+                        }
 
-    private boolean isValidPolygon() {
-        if (points.size() != polygon.getPoints().size() / 2) {
-            return false; // Not enough points to form a polygon
-        }
-
-        // Check if the last point is connected to the first point
-        Circle firstPoint = points.get(0);
-        Circle lastPoint = points.get(points.size() - 1);
-
-        List<Line> connectedLines = getConnectedLines(lastPoint);
-
-        for (Line line : connectedLines) {
-            double startX = line.getStartX();
-            double startY = line.getStartY();
-            double endX = line.getEndX();
-            double endY = line.getEndY();
-
-            if ((approxEqual(startX, lastPoint.getCenterX()) && approxEqual(startY, lastPoint.getCenterY())) ||
-                    (approxEqual(endX, lastPoint.getCenterX()) && approxEqual(endY, lastPoint.getCenterY())) ||
-                    (approxEqual(startX, firstPoint.getCenterX()) && approxEqual(startY, firstPoint.getCenterY())) ||
-                    (approxEqual(endX, firstPoint.getCenterX()) && approxEqual(endY, firstPoint.getCenterY()))) {
-                return true; // The last point is connected to the first point
+                    };
+                }
             }
+            arr.add(myPoint);
+        }
+        ArrayList<Integer> polygon = findPolygon(arr);
+        if (polygon != null) {
+            return polygon;
+        } else {
+            return null;
         }
 
-        return false;
     }
 
     public void addGroup(Polygon polygon, Pane rectanglePane,int [] batchs){
-        if (!isValidPolygon()) {
+        if (isValidPolygon() == null) {
             checkOverLap(batchs);
         }else {
             checkOverLapPolygon(polygon,rectanglePane,batchs);
@@ -309,20 +314,18 @@ public class LineSelector {
 
         orderedPoints.add(points.get(0)); // Add the first point to the ordered list
         points.remove(points.get(0));
-
+        Circle finalCircle = points.get(points.size()-1);
         for (int i = 1; i < Psize; i++) {
             Circle currentPoint = orderedPoints.get(i - 1);
             Circle closestPoint = findClosestCircle(currentPoint, points,lines);
 
-            if (closestPoint != null) {
+            if ((closestPoint != null)) {
                 orderedPoints.add(closestPoint);
-
                 points.remove(closestPoint);
             }else {
-                orderedPoints.add(currentPoint);
+                orderedPoints.add(points.get(0));
             }
         }
-
         return orderedPoints;
     }
 
@@ -382,11 +385,30 @@ public class LineSelector {
 
     public void checkOverLapPolygon(Polygon polygon, Pane rectanglePane,int [] batchs) {
         ArrayList <Tracker> t = new ArrayList<>();
+        int numberOfPoints = polygon.getPoints().size() / 2;
+
+        List<Line> additionaLines = new ArrayList<>();
+        if(points.size() > numberOfPoints){
+            additional = (ArrayList<Circle>) getAdditionalCircle();
+            for (int i = 0; i < additional.size(); i++) {
+                for (int j = 0; j < getConnectedLines(additional.get(i)).size(); j++) {
+                    additionaLines.add(getConnectedLines(additional.get(i)).get(j));
+                }
+            }
+        }
         for (int i = 0; i < theMainExtratorArr.size(); i++) {
             if(theMainExtratorArr.get(i).batch == batchs[0]){
                 if(isRectangleInsidePolygon(theMainExtratorArr.get(i).x,
                         theMainExtratorArr.get(i).y,10,polygon)){
                     t.add(theMainExtratorArr.get(i));
+                }
+                if(additional.size()>0){
+                    for (int j = 0; j < additional.size(); j++) {
+                        if(isTrackerBetween2Point(theMainExtratorArr.get(i),theMainExtratorArr.get(i).axis,
+                        0,additionaLines)){
+                            t.add(theMainExtratorArr.get(i));
+                        };
+                    }
                 }
             }
             if(theMainExtratorArr.get(i).batch == batchs[1]){
@@ -394,12 +416,46 @@ public class LineSelector {
                         theMainExtratorArr.get(i).y,10,polygon)){
                     t.add(theMainExtratorArr.get(i));
                 }
+                if(additional.size()>0){
+                    for (int j = 0; j < additional.size(); j++) {
+                        if(isTrackerBetween2Point(theMainExtratorArr.get(i),theMainExtratorArr.get(i).axis,
+                                450,additionaLines)){
+                            t.add(theMainExtratorArr.get(i));
+                        };
+                    }
+                }
             }
         }
         if (!t.isEmpty()) {
             arrLOfGroup.add(t);
         }
     }
+
+    public List<Circle> getAdditionalCircle( ) {
+        List<Circle> additionalCircles = new ArrayList<>();
+        List<Point2D> polygonPoints = new ArrayList<>();
+        for (int i = 0; i < polygon.getPoints().size(); i += 2) {
+            double x = polygon.getPoints().get(i);
+            double y = polygon.getPoints().get(i + 1);
+            polygonPoints.add(new Point2D(x, y));
+        }
+        // Iterate over each circle in the points list
+        for (int i = 0; i < points.size(); i++) {
+
+            for (int j = 0; j < polygonPoints.size();j++) {
+
+                if ((points.get(i).getCenterX() != polygonPoints.get(j).getX())&&
+                        (points.get(i).getCenterY() != polygonPoints.get(j).getY())) {
+                    additionalCircles.add(points.get(i));
+                    //break;
+                }
+            }
+        }
+        System.out.println(additionalCircles.get(0).getCenterX()+" "+additionalCircles.get(0).getCenterY()+"\n"+additionalCircles.get(1).getCenterX()+" "+additionalCircles.get(1).getCenterY());
+        return additionalCircles;
+    }
+
+
 
     public void checkOverLap(int [] batchs){
         ArrayList <Tracker> t = new ArrayList<>();
@@ -427,7 +483,38 @@ public class LineSelector {
             arrLOfGroup.add(t);
         }
     }
+
     private boolean isTrackerBetweenPoints(Tracker tracker,String axe,int layout) {
+        double trackerX = tracker.x;
+        double trackerY = tracker.y;
+        double trackerWidth = 10;
+
+        for (int i = 0; i < lines.size(); i++) {
+            if(lines.get(i).getEndX()-lines.get(i).getStartX() > lines.get(i).getStartY()-lines.get(i).getEndY()){
+                double minX = Math.min(lines.get(i).getStartX()-layout, lines.get(i).getEndX()-layout)-5;
+                double maxX = Math.max(lines.get(i).getStartX()-layout, lines.get(i).getEndX()-layout)+5;
+                double minY = Math.min(lines.get(i).getStartY(), lines.get(i).getEndY())-10;
+                double maxY = Math.max(lines.get(i).getStartY(), lines.get(i).getEndY());
+
+                if (trackerX >= minX && trackerX + trackerWidth <= maxX && trackerY >= minY && trackerY <= maxY && tracker.axis.equals(axe)) {
+                    return true;
+                }
+            }else {
+                double minX = Math.min(lines.get(i).getStartX()-layout, lines.get(i).getEndX()-layout)-5;
+                double maxX = Math.max(lines.get(i).getStartX()-layout, lines.get(i).getEndX()-layout)+5;
+                double minY = Math.min(lines.get(i).getStartY(), lines.get(i).getEndY())-10;
+                double maxY = Math.max(lines.get(i).getStartY(), lines.get(i).getEndY());
+
+                if (trackerX >= minX && trackerX + trackerWidth <= maxX && trackerY >= minY && trackerY <= maxY && tracker.axis.equals(axe)) {
+                    return true;
+                }
+
+            }
+        }
+
+        return false;
+    }
+    private boolean isTrackerBetween2Point(Tracker tracker,String axe,int layout,List<Line> lines) {
         double trackerX = tracker.x;
         double trackerY = tracker.y;
         double trackerWidth = 10;
@@ -459,7 +546,7 @@ public class LineSelector {
     }
 
     private boolean isRectangleInsidePolygon(double x, double y, double width, Polygon polygon) {
-        // Check each corner of the rectangle
+
         double[] corners = {
                 x, y,
                 x + width, y,
@@ -472,11 +559,83 @@ public class LineSelector {
             double cornerY = corners[i + 1];
 
             if (polygon.contains(cornerX, cornerY)) {
-
                 return true;
             }
         }
 
         return false;
+    }
+
+    static ArrayList<Integer> findPolygon(ArrayList<Points> pointsList) {
+        HashMap<String, HashSet<String>> graph = new HashMap<>();
+
+        // Build the graph from the given points list
+        for (Points point : pointsList) {
+            String[] connectedPoints = point.connectedTo.split(",");
+            HashSet<String> connections = new HashSet<>();
+            for (String connectedPoint : connectedPoints) {
+                connections.add(connectedPoint);
+            }
+            graph.put(point.nom, connections);
+        }
+
+        // Perform depth-first search (DFS) to find a cycle
+        HashSet<String> visited = new HashSet<>();
+        for (Points point : pointsList) {
+            if (!visited.contains(point.nom)) {
+                ArrayList<String> cycle = new ArrayList<>();
+                if (hasCycle(graph, point.nom, null, visited, cycle)) {
+                    ArrayList<Integer> polyVal = new ArrayList<>();
+                    for (int i = 0; i < cycle.size(); i++) {
+                        polyVal.add(Integer.parseInt(cycle.get(i)));
+                    }
+                    return polyVal;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    static boolean hasCycle(HashMap<String, HashSet<String>> graph, String current, String parent, HashSet<String> visited, ArrayList<String> cycle) {
+        visited.add(current);
+        cycle.add(current);
+        HashSet<String> neighbors = graph.get(current);
+        if (neighbors != null) {
+            for (String neighbor : neighbors) {
+                if (!neighbor.equals(parent)) {
+                    if (visited.contains(neighbor)) {
+                        // Found a cycle
+                        cycle.add(neighbor);
+                        return true;
+                    } else {
+                        if (hasCycle(graph, neighbor, current, visited, cycle)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        cycle.remove(current);
+        return false;
+    }
+}
+
+class Points {
+    String nom;
+    String connectedTo = "";
+
+    public Points() {
+
+    }
+    public Points(String nom) {
+        this.nom = nom;
+    }
+    public Points(String nom, String connect) {
+        this.nom = nom;
+        this.connectedTo = connect;
+    }
+    public void print(){
+        System.out.println(nom +" "+ connectedTo);
     }
 }

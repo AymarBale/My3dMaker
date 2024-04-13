@@ -36,11 +36,13 @@ public class EditorSettings extends Application {
     public static AtomicReference<Tab> addedTab = new AtomicReference<>(new Tab());
     public static String mergedAxe = "";
     public static int batchCount = 11;
+    public static int i = 0;
+    AtomicInteger finalI = new AtomicInteger(i);
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Multiple Tab Window");
-        int i = 0;
-        AtomicInteger finalI = new AtomicInteger(i);
+
+
 
         finalI.getAndIncrement();
         tabPane.setPrefSize(500,500);
@@ -51,6 +53,7 @@ public class EditorSettings extends Application {
 
         btn.setOnAction(value ->  {
             Tab tab = createTab(finalI,tabPane,primaryStage);
+            finalI.set(i);
             finalI.getAndIncrement();
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);

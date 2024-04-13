@@ -17,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
@@ -329,9 +330,8 @@ public class PositionUtility {
             }
         }
     }
-
     public static void callOn3dCreation(){
-        System.out.println(theMainExtratorArr.size());
+        cubesXZ = new int[][]{};
         for (int i = 0; i < theMainExtratorArr.size(); i++) {
             if(theMainExtratorArr.get(i).axis.equals("X")){
                 cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10,(int) theMainExtratorArr.get(i).z ,(int) theMainExtratorArr.get(i).y/10 );
@@ -349,6 +349,7 @@ public class PositionUtility {
                 cubesXZ = AddCubesToArray(cubesXZ, (int) theMainExtratorArr.get(i).x/10 ,(int) theMainExtratorArr.get(i).y/10 ,5);
             }
             System.out.println("X: "+(int) theMainExtratorArr.get(i).x/10+" Y: "+(int) (theMainExtratorArr.get(i).y/10)+" Z: "+(int) theMainExtratorArr.get(i).z);*/
+
         }
     }
 
@@ -379,6 +380,13 @@ public class PositionUtility {
     public static void printList(List<Circle> list) {
         for (Circle item : list) {
             System.out.println("\n"+item.getCenterX() +" "+ item.getCenterY());
+        }
+        System.out.println("<----------->");
+    }
+    public static void printLineList(List<Line> list) {
+        for (Line item : list) {
+            System.out.println(item.getStartX() +" "+ item.getEndX()+"\n"+
+                    item.getStartY() +" "+ item.getEndY());
         }
         System.out.print("<----------->");
     }

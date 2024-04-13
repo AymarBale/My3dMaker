@@ -4,9 +4,7 @@ import ColorsPaletteExtraction.Tracker;
 import Grid.PositionUtility;
 import javafx.scene.paint.Color;
 
-import java.io.File;  // Import the File class
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -24,9 +22,11 @@ public class Utils {
         public static ArrayList<Color> arrCol  = new ArrayList<>();// seulement couleur principale
         public static int colorCount = 0;
         public static ArrayList<String> simpleArr = new ArrayList<>();
+        public static String previousSubmit = "";
         public static void Create3DObject(){// function to create cubes
+            faceCount = 0;x_ori = 0;y_ori = 0;z_ori = 0;colorCount = 0;
 
-
+            removeStringFromFile("MyName.obj",previousSubmit);
             CreateFile("MyName.obj");
             //CreateFile("UColors.mtl");
             WriteFile("UColors.mtl",addMaterialShaders());
@@ -37,6 +37,7 @@ public class Utils {
                     {0+x_ori,0+y_ori,1+z_ori}}};
 
             WriteFile("MyName.obj",Preenbule("Nate","bale")+AddVertices(cubesXZ)+CreateVerticesNormals()+MakeMultiply(cubesXZ));
+            previousSubmit = AddVertices(cubesXZ)+CreateVerticesNormals()+MakeMultiply(cubesXZ);
         }
 
         private static String mergeFaces(String face1, String face2) {
@@ -210,4 +211,28 @@ public class Utils {
             }
             return materials;
         }
+
+    private static void removeStringFromFile(String filePath, String stringToRemove) {
+        if(stringToRemove.trim().length() != 0){
+            File file = new File(filePath);
+            StringBuilder contentBuilder = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.replace(stringToRemove, "");
+                    contentBuilder.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(contentBuilder.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+}

@@ -8,11 +8,6 @@ ear of right to back of left
 
 thing left to do{
  -group and rules
- -line selector
- {not completed because polygons cannot be mixed with lines,not and what happen}
  -simili
- -axe button come back when clicked again
- -close window disappear tab
- -multiple submit
 }
 
