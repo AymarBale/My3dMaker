@@ -7,6 +7,8 @@ import ImageTaker.GetMyImageAlongAxe;
 import Selector.ColorSelector;
 import Selector.LineSelector;
 import Selector.SquareSelector;
+import groupCreatorSyntax.CodingEditor;
+import groupCreatorSyntax.SyntaxDetector;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -241,14 +243,15 @@ public class GridPage extends Application{
                 System.out.println(Arrays.deepToString(connect));
             }
         });
-
         p2.setLayoutX(450);
+        System.out.println(batches[0]+" | "+batches[1]);
         p1.setOnMouseClicked(e -> {
             int x = (int)e.getX()/10;
             int y = (int)e.getY()/10;
             if(GridPage.createOption[0] == 0){
-                xorz = 1;
-                DrawSquare(p1,(int)e.getX()/10,(int)e.getY()/10,con,select);
+                /*xorz = 1;
+                DrawSquare(p1,(int)e.getX()/10,(int)e.getY()/10,con,select);*/
+                System.out.println("X:"+(int)e.getX()/10+" Y:"+(int)e.getY()/10+" Axis"+axis1+" bacth: "+batches[0]);
             }else if(GridPage.createOption[1] == 1){
                 Robot robot = null;
                 try {
@@ -285,8 +288,10 @@ public class GridPage extends Application{
             int x = (int)e.getX()/10;
             int y = (int)e.getY()/10;
             if(GridPage.createOption[0] == 0){
-                xorz = 2;
-                DrawSquare(p2,(int)e.getX()/10,(int)e.getY()/10,con,select);
+                /*xorz = 2;
+                DrawSquare(p2,(int)e.getX()/10,(int)e.getY()/10,con,select);*/
+
+                System.out.println("X:"+(int)e.getX()/10+" Y:"+(int)e.getY()/10+" Axis"+axis2+" "+" bacth: "+batches[1]);
             }else if(GridPage.createOption[1] == 1){
                 Robot robot = null;
                 try {
@@ -322,13 +327,12 @@ public class GridPage extends Application{
         root.getChildren().add(p1);
         root.getChildren().add(p2);
         TextField text = new TextField();
-
-
         ColorPicker cp = new ColorPicker(Color.BLUE);
         Button sameZ = new Button("Apply same z");
         Button createGroups = new Button("Create Groups");
         Button currGroups = new Button("Check the current group");
         Button connectGroups = new Button("connect");
+        Button useEditor = new Button("Use Editor");
 
         sameZ.setLayoutY(550);
         sameZ.setLayoutX(440);
@@ -338,6 +342,8 @@ public class GridPage extends Application{
         currGroups.setLayoutY(100);
         connectGroups.setLayoutX(390);
         connectGroups.setLayoutY(450);
+        useEditor.setLayoutX(200);
+        useEditor.setLayoutY(450);
         text.setLayoutY(550);
         text.setLayoutX(540);
 
@@ -352,6 +358,7 @@ public class GridPage extends Application{
         root.getChildren().add(createGroups);
         root.getChildren().add(currGroups);
         root.getChildren().add(connectGroups);
+        root.getChildren().add(useEditor);
         cp.setLayoutX(25);
         cp.setLayoutY(550);
         con.setLayoutX(250);
@@ -378,7 +385,6 @@ public class GridPage extends Application{
             close.setOnAction(actionEvent1 -> {
                 root.getChildren().remove(lGroup);
                 root.getChildren().remove(close);
-
             });
             root.getChildren().add(lGroup);
         });
@@ -387,7 +393,14 @@ public class GridPage extends Application{
                 c = cp.getValue();
             }
         });
-
+        useEditor.setOnAction(openEditorEvent -> {
+            /*Stage n = new Stage();
+            SyntaxDetector s = new SyntaxDetector();
+            s.start(n);*/
+            Stage n = new Stage();
+            CodingEditor s = new CodingEditor();
+            s.start(n);
+        });
         return root;
     }
     public static Pane exportPane(String axis, int batch){
@@ -406,7 +419,7 @@ public class GridPage extends Application{
             int x = (int)e.getX()/10;
             int y = (int)e.getY()/10;
             if(GridPage.createOption[0] == 0){
-                xorz = 1;
+                /**/xorz = 1;
                 DrawSquare(p1,(int)e.getX()/10,(int)e.getY()/10,con,select);
             }else if(GridPage.createOption[1] == 1){
                 Robot robot = null;
@@ -429,8 +442,7 @@ public class GridPage extends Application{
                 p1.setBackground(new javafx.scene.layout.Background(new javafx.scene.layout.BackgroundFill(Color.BLUE, null, null)));
                 p1.getChildren().add(toAdd);
             }else if(makeConnection){
-
-                /**/if(myConnector.size() < 2){
+                if(myConnector.size() < 2){
                     Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),axis,batch);
                     myConnector.add(theMainExtratorArr.indexOf(t));
                     if(myConnector.size() == 2) {

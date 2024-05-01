@@ -49,6 +49,7 @@ public class GetMyImageAlongAxe extends Application {
         });
         butY.setOnAction(event -> {
             butY.setLayoutY(375);
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigTop.png";
             chosenAxe = "Y";
             butX.setLayoutY(250);
             butZ.setLayoutY(250);
@@ -71,7 +72,7 @@ public class GetMyImageAlongAxe extends Application {
                 e.start(secondWindow);
                 secondWindow.setTitle("extractor Test page");
                 secondWindow.show();
-                //Extractor.QuickShort(secondWindow);
+                Extractor.QuickShort(secondWindow);
             } catch (Exception e) {
                 e.printStackTrace();
             }

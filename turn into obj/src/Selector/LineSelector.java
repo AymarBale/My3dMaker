@@ -27,7 +27,7 @@ import static Grid.PositionUtility.printList;
 public class LineSelector {
     public Group myLin = new Group();
 
-    private List<Circle> points = new ArrayList<>();
+    public List<Circle> points = new ArrayList<>();
     private List<Line> lines = new ArrayList<>();
     private Pane pointsLinePane;
     private Pane root;
@@ -97,7 +97,6 @@ public class LineSelector {
         lastMouseEvent = event;
         double x = event.getX();
         double y = event.getY();
-
         if (event.getButton() == MouseButton.PRIMARY) {
             if (checkPosition) {
                 System.out.println(" if is inside :"+isPointInsidePolygon(x,y));
@@ -241,7 +240,7 @@ public class LineSelector {
         root.getChildren().add(0, pointsLinePane);
     }
 
-    private void CreatePolygon() {
+    public void CreatePolygon() {
         polygon = new Polygon();
         if (points.size() < 3) {
             System.out.println("not enough points");
@@ -266,6 +265,12 @@ public class LineSelector {
         }
         polygon.setFill(Color.BLUE);
         polygon.setStroke(Color.GOLD);
+        double[] pointers = polygon.getPoints().stream().mapToDouble(Double::doubleValue).toArray();
+        for (int i = 0; i < pointers.length; i += 2) {
+            double x = pointers[i];
+            double y = pointers[i + 1];
+            System.out.println("(" + x + ", " + y + ")");
+        }
         root.getChildren().add(polygon);
     }
     //The points are not connected in a way that allows a polygon to be made.

@@ -285,9 +285,13 @@ public class Extractor extends Application {
             GridL(12.4,12.2,8,9);
             AddCubesToSender();
             timeToRemake();
+        }else if(GetMyImageAlongAxe.chosenAxe.equals("Y")){
+            additiveX = 14.11;
+            GridL(8.4,8.4,9,8);
+            AddCubesToSender();
+            timeToRemake();
         }
-
-        /**/try {
+        try {
             if(GetMyImageAlongAxe.count == 0){}
                 openSecondStage(s);
 

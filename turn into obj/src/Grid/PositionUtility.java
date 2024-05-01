@@ -4,22 +4,28 @@ import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
 import Editor.EditorSettings;
 import Selector.ColorSelector;
+import Utils3DCreation.com.Rules;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -38,11 +44,8 @@ public class PositionUtility {
     public static boolean makeConnection = false;
     public static ArrayList<Integer> myConnector = new ArrayList<>();
     public static Pane makeGrid(int n, int x_z, CheckBox c,CheckBox s){
-
         double width = 10;
         Pane pane = new Pane();
-
-
         Rectangle[][] rec = new Rectangle [n][n];
 
         for(int i=0; i<n; i++){
@@ -57,7 +60,25 @@ public class PositionUtility {
                 pane.getChildren().add(rec[i][j]);
             }
         }
+        return pane;
+    }
+    public static Pane makeGridForMini(int n){
+        double width = 10;
+        Pane pane = new Pane();
+        Rectangle[][] rec = new Rectangle [n][n];
 
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                rec[i][j] = new Rectangle();
+                rec[i][j].setX(i * width);
+                rec[i][j].setY(j * width);
+                rec[i][j].setWidth(width);
+                rec[i][j].setHeight(width);
+                rec[i][j].setFill(null);
+                rec[i][j].setStroke(Color.BLACK);
+                pane.getChildren().add(rec[i][j]);
+            }
+        }
         return pane;
     }
 
@@ -260,6 +281,13 @@ public class PositionUtility {
                 " inside the array");
         for (int i = 0; i < arrLOfGroup.size(); i++) {
             ArrayList<Tracker> current = arrLOfGroup.get(i);
+            Button visualizeBtn = new Button("+");
+            ImageView imageView = new ImageView(PositionUtility.class.getResource("eye.png").toExternalForm());
+            imageView.setFitWidth(10);
+            imageView.setFitHeight(10);
+            visualizeBtn.setMaxSize(10, 10);
+            visualizeBtn.setGraphic(imageView);
+
             Group g = new Group();
             Text text = new Text();
             if(allGroupName.get(arrLOfGroup.indexOf(current)).equals("")){
@@ -267,7 +295,61 @@ public class PositionUtility {
             }else{
                 text.setText(allGroupName.get(arrLOfGroup.indexOf(current)));
             }
+            visualizeBtn.setOnAction(actionEvent -> {
 
+                //----------------------------------
+                ArrayList<Circle> arr = new ArrayList<>();
+                Group miniGroup = new Group();
+                Button cRule = new Button("Create rule");
+                Text ruleListed = new Text();
+                for (int j = 0; j < Rules.arr.size(); j++) {
+                    ruleListed.setText(ruleListed.getText()+" "+Rules.arr.get(j));
+                }
+                final boolean[] ruleCreation = {false};
+                cRule.setOnAction(event -> {
+                    ruleCreation[0] = true;
+                });
+                TextField ruleVal = new TextField();
+                Button done = new Button("Done");
+                Button rulesList = new Button("rule history");
+                done.setLayoutX(120);done.setLayoutY(80);
+                rulesList.setLayoutX(180);rulesList.setLayoutY(80);
+                ruleListed.setLayoutY(240);ruleListed.setLayoutY(10);
+                final Line[] line = {null};
+                done.setOnAction(doneEvent ->{
+                    miniGroup.getChildren().removeIf(node -> node instanceof Circle || node instanceof Line);
+                    arr.clear();
+                    Rules.ApplyRule(current,ruleVal.getText(),line[0]);
+                });
+                rulesList.setOnAction(ruleEvent ->{
+                    System.out.println("testing");
+                    miniGroup.getChildren().add(ruleListed);
+                });
+                ruleVal.setLayoutY(40);
+                cRule.setLayoutX(120);
+                ruleVal.setLayoutX(120);
+                miniGroup.getChildren().addAll(done,ruleVal,cRule,rulesList);
+                addTrackersAsCubesToGroup(arrLOfGroup, arrLOfGroup.indexOf(current), miniGroup);
+                Stage stage = new Stage();
+                stage.setTitle("Visualizer window:"+text.getText());
+                Scene miniScene = new Scene(miniGroup, 390, 130);
+
+                miniScene.setOnMouseClicked(event -> {
+
+                    if((ruleCreation[0])&&(arr.size()<2)){
+                        Circle startCircle = new Circle((int) (Math.round(event.getX() / 5) * 5), (int) (Math.round(event.getY() / 5) * 5), 2, Color.RED);
+                        miniGroup.getChildren().add(startCircle);
+                        arr.add(startCircle);
+                    }
+                    if(arr.size() == 2){
+                        line[0]= new Line(arr.get(0).getCenterX(), arr.get(0).getCenterY(), arr.get(1).getCenterX(), arr.get(1).getCenterY());
+                        miniGroup.getChildren().add(line[0]);
+                    }
+
+                });
+                stage.setScene(miniScene);
+                stage.show();
+            });
             Button applyZ = new Button("ApplyZ");
             Button applyX = new Button("ApplyX");
             Button applyChange = new Button("Apply Change");
@@ -275,27 +357,25 @@ public class PositionUtility {
             g.getChildren().add(text);g.getChildren().add(applyX);
             g.getChildren().add(applyZ);
             g.getChildren().add(applyChange);
-
+            visualizeBtn.setLayoutX(100);
+            visualizeBtn.setLayoutY(10);
             applyX.setLayoutY(10);
             applyZ.setLayoutY(40);
             int finalI = i;
             applyX.setOnAction(actionEvent -> {
                 setAllX(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(arrLOfGroup.indexOf(current)));
-
             });
             applyZ.setOnAction(actionEvent -> {
                 setAllZ(Integer.parseInt(t_Input.getText()),arrLOfGroup.get(arrLOfGroup.indexOf(current)));
-
             });
             t_Input.setLayoutY(70);
             applyChange.setLayoutY(90);
             applyChange.setOnAction(actionEvent -> {
                 findAndReplace(theMainExtratorArr,arrLOfGroup.get(arrLOfGroup.indexOf(current)),arrLOfGroup.get(arrLOfGroup.indexOf(current)).get(0).axis);
                 mainGroup.getChildren().remove(g);
-
                 Tracker.removeSimilarList(arrLOfGroup,current);
-
             });
+            g.getChildren().add(visualizeBtn);
             g.getChildren().add(t_Input);
             g.setLayoutX(870);
             g.setLayoutY(150*(i+1));
@@ -303,6 +383,32 @@ public class PositionUtility {
 
         }
         return mainGroup;
+    }
+    public static void addTrackersAsCubesToGroup(ArrayList<ArrayList<Tracker>> arrLOfGroup, int index, Group group) {
+        ArrayList<Tracker> trackers = arrLOfGroup.get(index);
+        Pane grid = makeGridForMini(10);
+        for (Tracker tracker : trackers) {
+            Box cube = createCube(tracker.x-5, tracker.y-5, tracker.z, tracker.col);
+            grid.getChildren().add(cube);
+        }
+        group.getChildren().add(grid);
+    }
+
+    private static Box createCube(double x, double y, double z, Color color) {
+        // Create a cube
+        Box cube = new Box(9, 9, 9);
+
+        // Set position
+        cube.setTranslateX(x);
+        cube.setTranslateY(y);
+        cube.setTranslateZ(z);
+
+        // Set color
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(color);
+        cube.setMaterial(material);
+
+        return cube;
     }
 
     public static void setAllX(int x,ArrayList<Tracker> arr){

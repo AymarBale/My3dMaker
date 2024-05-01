@@ -36,14 +36,11 @@ public class EditorSettings extends Application {
     public static AtomicReference<Tab> addedTab = new AtomicReference<>(new Tab());
     public static String mergedAxe = "";
     public static int batchCount = 11;
-    public static int i = 0;
+    public static int i = 1;
     AtomicInteger finalI = new AtomicInteger(i);
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Multiple Tab Window");
-
-
-
         finalI.getAndIncrement();
         tabPane.setPrefSize(500,500);
         g.getChildren().add(tabPane);
@@ -52,17 +49,16 @@ public class EditorSettings extends Application {
         btn.setLayoutX(550);
 
         btn.setOnAction(value ->  {
-            Tab tab = createTab(finalI,tabPane,primaryStage);
             finalI.set(i);
+            Tab tab = createTab(finalI,tabPane,primaryStage);
             finalI.getAndIncrement();
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
+            i++;
         });
         sub.setOnAction(value ->  {
-
             callOn3dCreation();
             Create3DObject();
-
         });
         sub.setLayoutY(550);
         sub.setLayoutX(525);
@@ -107,7 +103,6 @@ public class EditorSettings extends Application {
                     if (oldTab instanceof AdvanceTab) {
                         ((AdvanceTab) oldTab).mergeBatch[0] = ((AdvanceTab) oldTab).batch;
                         ((AdvanceTab) oldTab).mergeBatch[1] = ((AdvanceTab) newTab).batch;
-
                     }
                     arrL.add(oldTab.getText());
                     arrL.add(newTab.getText());

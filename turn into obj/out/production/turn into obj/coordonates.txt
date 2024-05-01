@@ -9,6 +9,5 @@ ear of right to back of left
 thing left to do{
  -group and rules
  -simili
- -multiple submit
 }
 
