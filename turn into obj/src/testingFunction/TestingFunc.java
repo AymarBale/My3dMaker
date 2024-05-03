@@ -1,54 +1,29 @@
 package testingFunction;
 
-import groupCreatorSyntax.MyTextGroup;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
-import javafx.stage.Stage;
+import ColorsPaletteExtraction.Tracker;
+import Utils3DCreation.com.Rules;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static groupCreatorSyntax.SyntaxDetector.*;
 
-public class TestingFunc extends Application {
-
-    @Override
-    public void start(Stage primaryStage) {
-        // Create a Polygon with the specified points
-        Polygon polygon = new Polygon();
-        polygon.getPoints().addAll(
-                15.0, 15.0,
-                15.0, 35.0,
-                35.0, 35.0,
-                35.0, 15.0
+public class TestingFunc{
 
 
-        );
-
-        // Set the fill color and stroke color
-        polygon.setFill(Color.TRANSPARENT);
-        polygon.setStroke(Color.BLACK);
-
-        // Coordinates of the tracker
-        double trackerX = 90.0;
-        double trackerY = 30.0;
-
-        // Check if the tracker is inside the polygon
-        boolean inside = polygon.contains(trackerX, trackerY);
-
-        // Print the result
-        System.out.println("Is tracker inside polygon? " + inside);
-
-
-    }
 
     public static void main(String[] args) {
-        launch(args);
+        String input = "GROUPNAME(test){\n" +
+                "valAxis: 3;\n" +
+                "axis: X;\n" +
+                "Corner: {[20,20],[20,40],[20,40],[20,10]};\n" +
+                "batch: 11;\n" +
+                "color: #FFFFFF;\n" +
+                "rules: {[1 ++ all|1,2|3,4],[1 ++ all|5,6|7,8]}\n" +
+                "}\n";
+        detectRule(input);
     }
     public static void detectRule(String input){
         String pattern = "rules:\\s*\\{([^{}]*)\\}";
@@ -67,13 +42,43 @@ public class TestingFunc extends Application {
             if (lastIndex != -1) {
                 input = input.substring(0, lastIndex) + input.substring(lastIndex + 1);
             }
-            System.out.println(input);
-            convertGroups(input);
-        } else {
-            System.out.println("No rule line found.");
+            String[] rules = ruleLine.split("]");
+            for (String r : rules) {
+                applyRuleForText(new ArrayList<>(), r);
+            }
         }
+        convertGroups(input);
+    }
+    public static void applyRuleForText(ArrayList<Tracker> trackers, String rule) {
+        while ((rule.charAt(0) == ',')||(rule.charAt(0) == '[')){
+            StringBuilder remChar = new StringBuilder(rule);
+            remChar.deleteCharAt(0);
+            rule = String.valueOf(remChar);
+
+        }
+        StringBuilder remChar = new StringBuilder(rule);
+        int endIndex = rule.indexOf('|');
+        if (0 < endIndex) {
+            remChar.delete(endIndex ,rule.length() ); // Delete from 'e' to 'o', inclusive
+        }
+        String ruleString = String.valueOf(remChar);
+        String numericVal = rule.replace(ruleString,"");
+        ArrayList<Integer> val = findIntegers(numericVal);
+        Rules myRule = new Rules(ruleString,val.get(0),val.get(1),val.get(2),val.get(3));
+        System.out.println(myRule.toString());
     }
 
+    public static ArrayList<Integer> findIntegers(String stringToSearch) {
+        Pattern integerPattern = Pattern.compile("-?\\d+");
+        Matcher matcher = integerPattern.matcher(stringToSearch);
+
+        ArrayList<Integer> integerList = new ArrayList<>();
+        while (matcher.find()) {
+            integerList.add(Integer.valueOf(matcher.group()));
+        }
+
+        return integerList;
+    }
 
 
 }

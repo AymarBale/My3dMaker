@@ -24,6 +24,8 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static groupCreatorSyntax.SyntaxDetector.*;
 
@@ -54,6 +56,7 @@ public class CodingEditor extends Application {
         visualize.setOnAction(EventTest -> {
             ArrayList<Tracker> ruleArr = new ArrayList<>();
             ArrayList<Tracker> copyArrayList = new ArrayList<>();
+            ArrayList<Tracker> vizualiseRuleArr = new ArrayList<>();
             for (Tracker tracker : GridPage.theMainExtratorArr) {
                 copyArrayList.add(deepCopyTracker(tracker));
             }
@@ -66,14 +69,15 @@ public class CodingEditor extends Application {
 
                 MyTextGroup textGroup = convertGroups(textVal);
                 for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
-                    if(poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y)&&GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
-                        GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis/10;
+                    if (poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) && GridPage.theMainExtratorArr.get(i).batch == textGroup.batch) {
+                        GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
                         copyArrayList.get(i).z = textGroup.valAxis;
                         ruleArr.add(GridPage.theMainExtratorArr.get(i));
-                    };
+                        vizualiseRuleArr.add(copyArrayList.get(i));
+                    }
                 }
+                detectRule(textVal,ruleArr,vizualiseRuleArr);
             }
-            //Rules.ApplyRuleForText(ruleArr,"1 ++ only",new Line(20,25,30,25));
             trackerGroup.getChildren().clear();
             for (Tracker tracker : copyArrayList) {
                 if(tracker.axis.equals("X")){
@@ -124,6 +128,60 @@ public class CodingEditor extends Application {
         primaryStage.setTitle("TEST");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+    public static void detectRule(String input,ArrayList<Tracker> arr,ArrayList<Tracker> visualizeTracker){
+        String pattern = "rules:\\s*\\{([^{}]*)\\}";
+
+        // Create a Pattern object
+        Pattern regex = Pattern.compile(pattern);
+
+        // Create a Matcher object
+        Matcher matcher = regex.matcher(input);
+
+        // Find and print the rule line content if present
+        if (matcher.find()) {
+            String ruleLine = matcher.group(1).trim();
+            input = matcher.replaceAll(""); // Replace the matched rule line with an empty string
+            int lastIndex = input.lastIndexOf("\n");
+            if (lastIndex != -1) {
+                input = input.substring(0, lastIndex) + input.substring(lastIndex + 1);
+            }
+            String[] rules = ruleLine.split("]");
+            for (String r : rules) {
+                applyRuleForText(arr, r,visualizeTracker);
+            }
+        }
+    }
+    public static void applyRuleForText(ArrayList<Tracker> trackers, String rule,ArrayList<Tracker> visualizeTracker) {
+        while ((rule.charAt(0) == ',')||(rule.charAt(0) == '[')){
+            StringBuilder remChar = new StringBuilder(rule);
+            remChar.deleteCharAt(0);
+            rule = String.valueOf(remChar);
+
+        }
+        StringBuilder remChar = new StringBuilder(rule);
+        int endIndex = rule.indexOf('|');
+        if (0 < endIndex) {
+            remChar.delete(endIndex ,rule.length() ); // Delete from 'e' to 'o', inclusive
+        }
+        String ruleString = String.valueOf(remChar);
+        String numericVal = rule.replace(ruleString,"");
+        ArrayList<Integer> val = findIntegers(numericVal);
+        Rules myRule = new Rules(ruleString,val.get(0),val.get(1),val.get(2),val.get(3));
+        Rules.ApplyRule(trackers,myRule.rule,new Line(myRule.initX,myRule.initY,myRule.endX,myRule.endY));
+        Rules.ApplyTextRule(visualizeTracker,myRule.rule,new Line(myRule.initX,myRule.initY,myRule.endX,myRule.endY));
+    }
+
+    public static ArrayList<Integer> findIntegers(String stringToSearch) {
+        Pattern integerPattern = Pattern.compile("-?\\d+");
+        Matcher matcher = integerPattern.matcher(stringToSearch);
+
+        ArrayList<Integer> integerList = new ArrayList<>();
+        while (matcher.find()) {
+            integerList.add(Integer.valueOf(matcher.group()));
+        }
+
+        return integerList;
     }
     private void initMouseControl(Group group, SubScene scene,Stage stage){
         Rotate xRotate;
