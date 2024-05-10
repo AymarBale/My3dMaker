@@ -71,6 +71,31 @@ public class LineSelector {
 
         myLin.getChildren().add(t);
     }
+    public LineSelector(int x,int y){
+        Button checkPos = new Button("checkMyPos");
+        checkPos.setLayoutY(450);
+        checkPos.setLayoutX(480);
+        root = new Pane();
+        pointsLinePane = new Pane();
+
+        root.getChildren().addAll(pointsLinePane, checkPos);
+        root.setStyle("-fx-background-color: rgba(0, 255, 0, 0.2);");
+        root.setPrefSize(850, 500);
+
+        checkPos.setOnAction(e -> {
+            checkPosition = !checkPosition;
+            CreatePolygon();
+        });
+        ajouter.setLayoutY(450);
+        ajouter.setLayoutX(570);
+        myLin.setOnMousePressed(this::handleMousePressed);
+        myLin.setOnMouseDragged(this::handleMouseDragged);
+        myLin.setOnMouseReleased(this::handleMouseReleased);
+        myLin.setOnMouseClicked(this::handleMouseClick);
+
+        myLin.getChildren().add(root);
+        myLin.getChildren().add(ajouter);
+    }
     private void removeLinesConnectedToCircle(Circle circle) {
         List<Line> linesToRemove = new ArrayList<>();
 
@@ -269,7 +294,6 @@ public class LineSelector {
         for (int i = 0; i < pointers.length; i += 2) {
             double x = pointers[i];
             double y = pointers[i + 1];
-            System.out.println("(" + x + ", " + y + ")");
         }
         root.getChildren().add(polygon);
     }

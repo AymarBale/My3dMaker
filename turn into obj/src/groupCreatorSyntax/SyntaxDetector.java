@@ -3,20 +3,24 @@ package groupCreatorSyntax;
 
 import ColorsPaletteExtraction.Tracker;
 import Grid.GridPage;
+import Selector.LineSelector;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ public class SyntaxDetector extends Application {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         // Add labels and text fields for each attribute
+
         String[] attributes = {"GroupName", "valAxis", "axis", "Corner", "batch", "color"};
         TextField[] textFields = new TextField[attributes.length];
         for (int i = 0; i < attributes.length; i++) {
@@ -43,27 +48,60 @@ public class SyntaxDetector extends Application {
             gridPane.add(label, 0, i);
             gridPane.add(textField, 1, i);
         }
-// Create TextArea
-        // Create and add the Synthesize button
+
+        Pane root = new Pane();
         Button synthesizeButton = new Button("Synthesize");
+        Button useViewer = new Button("use corner Viewer");
+        LineSelector l = new LineSelector(0,0);
+
+
+        useViewer.setOnAction(e ->{
+            if(!(textFields[2].getText().trim().isEmpty())&&!(textFields[4].getText().trim().isEmpty())){
+                ArrayList<Tracker> myCubes = getArrayListForCornerViewer(textFields[2].getText(),Integer.parseInt(textFields[4].getText()));
+                Pane smallPane = GridPage.exportPane(textFields[2].getText(),Integer.parseInt(textFields[4].getText()));
+                Group remake = new Group();
+                remake = remakeForViewer(myCubes,remake,10.270);
+                smallPane.setLayoutX(280);
+                root.getChildren().add(smallPane);
+                root.getChildren().add(remake);
+                root.getChildren().add(l.myLin);
+            }
+        });
+        l.ajouter.setOnAction(actionEvent -> {
+            textFields[3].setText(convertPolygonToString(l.polygon));
+            root.getChildren().remove(l.myLin);
+        });
         synthesizeButton.setOnAction(e ->{
-                synthesizeGroups(textFields,attributes,CodingEditor.text);
-                primaryStage.close();}
-        );
+            boolean anyEmpty = false;
+            for (TextField textField : textFields) {
+                if (textField.getText().isEmpty()) {
+                    anyEmpty = true;
+                    break;
+                }
+            }
+            if(!anyEmpty) {
+                synthesizeGroups(textFields, attributes, CodingEditor.text);
+                root.getChildren().clear();
+                primaryStage.close();
+            }
+        });
+        Text t = new Text("Vous devez remplir \nle champs axis  et batch\n avant d'utiliser le viewer");
+        t.setLayoutY(280);
+        t.setLayoutX(10);
         gridPane.add(synthesizeButton, 0, attributes.length);
-
-
+        gridPane.add(useViewer, 1, attributes.length);
 
         // Create Layout
         VBox layout = new VBox(10);
         layout.setLayoutX(300);
         layout.setLayoutY(20);
         // Create StackPane to center VBox
-        Pane root = new Pane();
+
         root.getChildren().add(layout);
         root.getChildren().add(gridPane);
+        root.getChildren().add(t);
         // Create Scene
-        Scene scene = new Scene(root, 640, 350);
+        Scene scene = new Scene(root, 740, 550);
 
         // Set Scene
         primaryStage.setScene(scene);
@@ -81,6 +119,7 @@ public class SyntaxDetector extends Application {
                 "}";
         t.setText(t.getText()+"\n"+input);
     }
+
     public static MyTextGroup convertGroups(String input) {
         // Check if the input contains the necessary substrings
         if (!input.contains("GROUPNAME(") || !input.contains("valAxis:") || !input.contains("axis:")
@@ -121,6 +160,7 @@ public class SyntaxDetector extends Application {
 
         return t;
     }
+
     public static String extractCornerLine(String input) {
         String pattern = "Corner:\\s*\\{\\s*((\\[\\s*-?\\d+\\s*,\\s*-?\\d+\\s*\\]\\s*,?\\s*)*)\\};\\s*";
 
@@ -137,6 +177,7 @@ public class SyntaxDetector extends Application {
             return "Corner line not found in the input.";
         }
     }
+
     public static ArrayList<String> extractGroupNames(String input) {
         ArrayList<String> groupNames = new ArrayList<>();
         // Define the pattern to extract group names
@@ -151,6 +192,7 @@ public class SyntaxDetector extends Application {
         }
         return groupNames;
     }
+
     public static void createCirclesFromCoordinates(String coordinates, ArrayList<Circle> points) {
         String[] pairs = coordinates.split("\\],\\[");
 
@@ -166,6 +208,7 @@ public class SyntaxDetector extends Application {
         }
 
     }
+
     public static Polygon createPolyWithText(ArrayList<Circle> Points) {
         // Create a new polygon
         Polygon polygon = new Polygon();
@@ -179,31 +222,44 @@ public class SyntaxDetector extends Application {
 
         return polygon;
     }
-    public static boolean isTrackerInsidePolygon(Tracker tracker, Polygon polygon) {
-        double x = tracker.x;
-        double y = tracker.y;
-        double trackerSize = 10; // Assuming the tracker size is 10
 
-        // Count intersections of the polygon edges with a line parallel to the x-axis
-        int intersections = 0;
-        for (int i = 0; i < polygon.getPoints().size(); i += 2) {
-            double x1 = polygon.getPoints().get(i);
-            double y1 = polygon.getPoints().get(i + 1);
-            double x2 = polygon.getPoints().get((i + 2) % polygon.getPoints().size());
-            double y2 = polygon.getPoints().get((i + 3) % polygon.getPoints().size());
 
-            // Check if the line crosses the horizontal line at y
-            if ((y1 <= y + trackerSize && y - trackerSize < y2) || (y2 <= y + trackerSize && y - trackerSize < y1)) {
-                // Calculate the x-coordinate of the intersection point
-                double intersectionX = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
-                // If the intersection point is to the right of the test point, count it
-                if (x <= intersectionX)
-                    intersections++;
+
+    public static ArrayList<Tracker> getArrayListForCornerViewer(String axe,int batch){
+        ArrayList<Tracker> myCubes = new ArrayList<>();
+        for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
+            if((GridPage.theMainExtratorArr.get(i).axis.equals(axe))&&
+            (GridPage.theMainExtratorArr.get(i).batch == batch)){
+                myCubes.add(GridPage.theMainExtratorArr.get(i));
             }
         }
-
-        // If the number of intersections is odd, the tracker is inside the polygon
-        return intersections % 2 == 1;
+        return myCubes;
     }
 
+    public static Group remakeForViewer(ArrayList<Tracker> myCubes, Group remake, double additiveX){
+        for (int i = 0; i < myCubes.size(); i++){
+            Rectangle r = new Rectangle(9,9);
+            r.setX(myCubes.get(i).x+280);
+            r.setY(myCubes.get(i).y);
+            r.setFill(myCubes.get(i).col);
+            remake.getChildren().add(r);
+        }
+        return remake;
+    }
+
+    public static String convertPolygonToString(Polygon polygon) {
+        StringBuilder corners = new StringBuilder();
+
+        for (int i = 0; i < polygon.getPoints().size(); i++) {
+            if (i % 2 == 0) { // Even index means X-coordinate
+                corners.append("[");
+                corners.append((Double.valueOf(polygon.getPoints().get(i) - 285)).intValue()).append(",");
+            } else { // Odd index means Y-coordinate
+                corners.append((Double.valueOf(polygon.getPoints().get(i) - 5)).intValue());
+                corners.append("],");
+            }
+        }
+        String modifiedString = corners.substring(0, corners.length() - 1);
+        return modifiedString;
+    }
 }

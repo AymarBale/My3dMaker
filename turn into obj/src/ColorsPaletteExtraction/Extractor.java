@@ -292,10 +292,10 @@ public class Extractor extends Application {
             timeToRemake();
         }
         try {
-            if(GetMyImageAlongAxe.count == 0){}
+            if(GetMyImageAlongAxe.count == 0){
+
+            }
                 openSecondStage(s);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }

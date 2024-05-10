@@ -42,21 +42,21 @@ public class GetMyImageAlongAxe extends Application {
         });
         butX.setOnAction(event -> {
             butX.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";//
             chosenAxe = "X";
             butY.setLayoutY(250);
             butZ.setLayoutY(250);
         });
         butY.setOnAction(event -> {
             butY.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigTop.png";
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigTop.png";//
             chosenAxe = "Y";
             butX.setLayoutY(250);
             butZ.setLayoutY(250);
         });
         butZ.setOnAction(event -> {
             butZ.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";
+            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";//
             chosenAxe = "Z";
             butX.setLayoutY(250);
             butY.setLayoutY(250);
@@ -72,7 +72,7 @@ public class GetMyImageAlongAxe extends Application {
                 e.start(secondWindow);
                 secondWindow.setTitle("extractor Test page");
                 secondWindow.show();
-                Extractor.QuickShort(secondWindow);
+                Extractor.QuickShort(secondWindow);//            ------------------------> change for quicksort
             } catch (Exception e) {
                 e.printStackTrace();
             }

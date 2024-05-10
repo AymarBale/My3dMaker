@@ -21,6 +21,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -244,7 +246,6 @@ public class GridPage extends Application{
             }
         });
         p2.setLayoutX(450);
-        System.out.println(batches[0]+" | "+batches[1]);
         p1.setOnMouseClicked(e -> {
             int x = (int)e.getX()/10;
             int y = (int)e.getY()/10;
@@ -401,6 +402,14 @@ public class GridPage extends Application{
             CodingEditor s = new CodingEditor();
             s.start(n);
         });
+        Text batchText = new Text();
+        batchText.setFill(Color.rgb((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)));
+
+        batchText.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        batchText.setText("Batch Count: " + batches[0]+"| "+batches[1]);
+        batchText.setLayoutY(465); // Set the x position
+        batchText.setLayoutX(50); // Set the z position
+        root.getChildren().add(batchText);
         return root;
     }
     public static Pane exportPane(String axis, int batch){
@@ -453,6 +462,14 @@ public class GridPage extends Application{
                 }
             }
         });
+        Text additionalText = new Text("Batch:"+batch);
+        additionalText.setFill(Color.rgb((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)));
+        additionalText.setLayoutX(100); // Set x position
+        additionalText.setLayoutY(450); // Set y position
+        additionalText.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;"); // Set font style
+
+        // Add the additional text to the pane
+        p1.getChildren().add(additionalText);
         root.getChildren().add(p1);
 
         con.setLayoutX(250);

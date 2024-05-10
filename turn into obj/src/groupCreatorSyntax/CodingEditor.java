@@ -37,13 +37,22 @@ public class CodingEditor extends Application {
     private double anchorAngleY = 0;
     private final DoubleProperty angleX = new SimpleDoubleProperty(0);
     private final DoubleProperty angleY = new SimpleDoubleProperty(0);
+    /* <----------------------------------------------------------------> */
+    private double anchrX;
+    private double anchrY;
+    private double anchr_angX = 0;
+    private double anchr_angY = 0;
+    private final DoubleProperty anglX = new SimpleDoubleProperty();
+    private final DoubleProperty anglY = new SimpleDoubleProperty();
+    /* <----------------------------------------------------------------> */
     public static TextArea text = new TextArea();
     @Override
     public void start(Stage primaryStage) {
         Group trackerGroup = new Group();
         Camera cam = new PerspectiveCamera();
         SubScene subScene = new SubScene(trackerGroup, width, height, true, SceneAntialiasing.BALANCED);
-        initMouseControl(trackerGroup,subScene,primaryStage);
+        //initMouseControl(trackerGroup,subScene,primaryStage);
+        initmouse(trackerGroup,subScene,primaryStage);
         subScene.setCamera(cam);
         subScene.setLayoutX(width);
         subScene.setLayoutY(10);
@@ -68,12 +77,23 @@ public class CodingEditor extends Application {
                 Polygon poly = createPolyWithText(points);
 
                 MyTextGroup textGroup = convertGroups(textVal);
+
                 for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
-                    if (poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) && GridPage.theMainExtratorArr.get(i).batch == textGroup.batch) {
+                    if ((poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) |
+                            (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y + 5))|
+                            (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                            (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                            (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y + 5))) &&
+                            GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+
                         GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
                         copyArrayList.get(i).z = textGroup.valAxis;
                         ruleArr.add(GridPage.theMainExtratorArr.get(i));
                         vizualiseRuleArr.add(copyArrayList.get(i));
+                    }else {
+                        if(GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+                            System.out.println("Not Inside --->:"+GridPage.theMainExtratorArr.get(i).x +" "+GridPage.theMainExtratorArr.get(i).y+"<---");
+                        }
                     }
                 }
                 detectRule(textVal,ruleArr,vizualiseRuleArr);
@@ -97,6 +117,15 @@ public class CodingEditor extends Application {
                     box.setTranslateX((width/2)+tracker.z); // Set the position of the box
                     box.setTranslateY((height/2)+tracker.y);
                     box.setTranslateZ(tracker.x);
+                    trackerGroup.getChildren().add(box);
+                }else if (tracker.axis.equals("Y")){
+                    Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
+                    PhongMaterial material = new PhongMaterial();
+                    material.setDiffuseColor(tracker.col); // Use the color of the tracker
+                    box.setMaterial(material);
+                    box.setTranslateX((width/2)+tracker.x); // Set the position of the box
+                    box.setTranslateY((height/2)+tracker.z);
+                    box.setTranslateZ(tracker.y);
                     trackerGroup.getChildren().add(box);
                 }
             }
@@ -183,30 +212,32 @@ public class CodingEditor extends Application {
 
         return integerList;
     }
-    private void initMouseControl(Group group, SubScene scene,Stage stage){
-        Rotate xRotate;
-        Rotate yRotate;
-        group.getTransforms().addAll(
-                xRotate = new Rotate(0,Rotate.X_AXIS),
-                    yRotate = new Rotate(0,Rotate.Y_AXIS)
-        );
-        xRotate.angleProperty().bind(angleX);
-        yRotate.angleProperty().bind(angleY);
+
+    private void initmouse(Group root,SubScene scene,Stage stage){
+        Rotate xrotate;
+        Rotate yrotate;
+        root.getTransforms().addAll(xrotate=new Rotate(0,Rotate.X_AXIS),yrotate=new Rotate(0,Rotate.Y_AXIS));
+        xrotate.angleProperty().bind(anglX);
+        yrotate.angleProperty().bind(anglY);
+        xrotate.setPivotX(width/2); // Set the desired x-coordinate of the pivot point
+        xrotate.setPivotY(height/2); // Set the desired y-coordinate of the pivot point
+
+        yrotate.setPivotX(width/2);
+        yrotate.setPivotY(height/2);
         scene.setOnMousePressed(mouseEvent -> {
-            anchorX = mouseEvent.getSceneX();
-            anchorY = mouseEvent.getSceneY();
-            anchorAngleX = angleX.get();
-            anchorAngleY = angleY.get();
+            anchrX = mouseEvent.getScreenX();
+            anchrY = mouseEvent.getScreenY();
+            anchr_angX = anglX.get();
+            anchr_angY = anglY.get();
         });
 
         scene.setOnMouseDragged(mouseEvent -> {
-            angleX.set(anchorAngleX - (anchorY - mouseEvent.getSceneY()));
-            angleY.set(anchorAngleY - (anchorX - mouseEvent.getSceneX()));
+            anglX.set(anchr_angX - (anchrY - mouseEvent.getScreenY()));
+            anglY.set(anchr_angY + (anchrX - mouseEvent.getScreenX()));
         });
-
         stage.addEventHandler(ScrollEvent.SCROLL , event -> {
             double delta = event.getDeltaY();
-            group.translateZProperty().set(group.getTranslateZ() + delta);
+            root.translateZProperty().set(root.getTranslateZ() + delta);
         });
     }
     public static Tracker deepCopyTracker(Tracker original) {
