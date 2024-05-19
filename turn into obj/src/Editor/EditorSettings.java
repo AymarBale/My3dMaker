@@ -3,7 +3,9 @@ package Editor;
 import Grid.GridPage;
 import ImageTaker.AdvanceTab;
 import ImageTaker.GetMyImageAlongAxe;
+import ImageTaker.QuickImport;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -20,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static Grid.GridPage.theMainExtratorArr;
+import static Grid.GridPage.updatedPane;
 import static Grid.PositionUtility.*;
 import static Utils3DCreation.com.Utils.Create3DObject;
 import static Utils3DCreation.com.Utils.cubesXZ;
@@ -31,30 +34,53 @@ public class EditorSettings extends Application {
     public static TabPane tabPane = new TabPane();
     Button sub = new Button("SUBMIT");
     static Group g = new Group();
-    public static Scene scene = new Scene(g, 600, 600);
+    public static Scene scene = new Scene(g, 800,600 );
     public static Button btn = new Button("+");
+    public static Button importTextbtn = new Button("use import text");
     public static AtomicReference<Tab> addedTab = new AtomicReference<>(new Tab());
     public static String mergedAxe = "";
     public static int batchCount = 11;
     public static int i = 1;
     AtomicInteger finalI = new AtomicInteger(i);
+    public static Stage secondaryStage = new Stage();
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Multiple Tab Window");
+        secondaryStage.setTitle("Multiple Tab Window");
+        TextArea importText = new TextArea();
+        importText.setStyle("-fx-control-inner-background: #ffd700;");
+        importText.setStyle("-fx-control-inner-background:#352F44; -fx-font-family: Monospace; -fx-highlight-fill: #ffd700; -fx-highlight-text-fill: #000000; -fx-text-fill: #ffd700; ");
+        importText.setPadding(new Insets(5));
+        importText.setPrefWidth(200);
+        importText.setPrefHeight(560);
+        importText.setLayoutX(590);
+        importText.setLayoutY(10);
+        importTextbtn.setLayoutX(600);
+        importTextbtn.setLayoutY(573);
+        importTextbtn.setStyle("-fx-font-size: 14; -fx-background-color: #1E90FF; -fx-text-fill: white;");
         finalI.getAndIncrement();
         tabPane.setPrefSize(500,500);
+        g.getChildren().add(importText);
         g.getChildren().add(tabPane);
         g.getChildren().add(btn);
         g.getChildren().add(sub);
+        g.getChildren().add(importTextbtn);
         btn.setLayoutX(550);
-
+        importTextbtn.setOnAction(value -> {
+            if(!importText.getText().isEmpty()){
+                QuickImport.getAllQI(importText.getText());
+                useQI();
+            }
+        });
         btn.setOnAction(value ->  {
-            finalI.set(i);
-            Tab tab = createTab(finalI,tabPane,primaryStage);
+            Stage s = new Stage();
+            GetMyImageAlongAxe g = new GetMyImageAlongAxe();
+            g.start(s);
+            /*finalI.set(i);
+            Tab tab = createTab(finalI,tabPane);
             finalI.getAndIncrement();
             tabPane.getTabs().add(tab);
             tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
-            i++;
+            i++;*/
         });
         sub.setOnAction(value ->  {
             callOn3dCreation();
@@ -64,17 +90,18 @@ public class EditorSettings extends Application {
         sub.setLayoutX(525);
 
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        secondaryStage.setScene(scene);
+        secondaryStage.show();
+    }
+    public static void useQI(){
+            btn.fire();
     }
 
 
-
-    public static AdvanceTab createTab(AtomicInteger i, TabPane tabPane, Stage a){
+    public static AdvanceTab createTab(int i, TabPane tabPane,Stage a){
         AdvanceTab tab = new AdvanceTab("Tab  "+ i);
-        Stage s = new Stage();
-        GetMyImageAlongAxe g = new GetMyImageAlongAxe();
-        g.start(s);
+        //tabPane.getTabs().add(tab);
+
         tab.setContent(new Pane());
         ContextMenu contextMenu = new ContextMenu();
         MenuItem merge = new MenuItem("merge");
@@ -83,6 +110,7 @@ public class EditorSettings extends Application {
         merge.setOnAction((event) -> {
             listenForMerge = true;
         });
+
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
             if (listenForMerge && (newTab != null)) {
                 spliter.clear();
@@ -119,6 +147,7 @@ public class EditorSettings extends Application {
             }
         });
         mSplit.setOnAction((event) -> {
+            updatedPane.clear();
             mergedAxe = "";
             int secondNumber = extractSecondNumber(tab.getText());
             tabPane.setPrefSize(500,600);
@@ -134,6 +163,10 @@ public class EditorSettings extends Application {
         });
         contextMenu.getItems().addAll(merge,mSplit);
         tab.setContextMenu(contextMenu);
+        tab.setOnClosed(event -> {
+            System.out.println("Tab 1 is closed. Performing cleanup or additional actions...");
+            // Add your custom code here to handle tab close event
+        });
         return tab;
     }
     private static int extractSecondNumber(String input) {

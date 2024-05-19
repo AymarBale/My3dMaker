@@ -19,6 +19,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -30,6 +32,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static Grid.PositionUtility.*;
 import static Selector.SquareSelector.*;
@@ -39,6 +43,7 @@ public class GridPage extends Application{
     public static ArrayList <Tracker> theMainExtratorArr = new ArrayList<>();/**/
     public static ArrayList<ArrayList<Tracker>> arrLOfGroup = new ArrayList<>();
     public static ArrayList<String> allGroupName = new ArrayList<>();
+    public static Map<Integer,Pane> updatedPane = new HashMap<>();
     public Button loadAnother = new Button("Load another scene");
     public static Color c = Color.BLACK;
     public static ArrayList<myImagePosition> savedArray = new ArrayList<myImagePosition>();
@@ -325,6 +330,8 @@ public class GridPage extends Application{
                 }
             }
         });
+
+
         root.getChildren().add(p1);
         root.getChildren().add(p2);
         TextField text = new TextField();
@@ -412,6 +419,7 @@ public class GridPage extends Application{
         root.getChildren().add(batchText);
         return root;
     }
+
     public static Pane exportPane(String axis, int batch){
 
         Group root = new Group();
@@ -467,11 +475,137 @@ public class GridPage extends Application{
         additionalText.setLayoutX(100); // Set x position
         additionalText.setLayoutY(450); // Set y position
         additionalText.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;"); // Set font style
-
+        updatedPane.put(batch,p1);
         // Add the additional text to the pane
-        p1.getChildren().add(additionalText);
-        root.getChildren().add(p1);
 
+        root.getChildren().add(p1);
+        Button copyButton = new Button("Copy QI");
+
+        // Set up the button action
+        copyButton.setOnAction(event -> {
+            // The string you want to copy to the clipboard
+            String textToCopy = "{\n" +
+                    "path:"+GetMyImageAlongAxe.path+";\n"+
+                    "chosenAxe:"+GetMyImageAlongAxe.chosenAxe+";\n" +
+                    "additive:"+Extractor.additiveX+";\n" +
+                    "val:" +Extractor.myGridSizeX+","+Extractor.myGridSizeY+
+                    ","+Extractor.currentPos[0]+","+Extractor.currentPos[1]+";\n" +
+                    "}";
+
+            // Create a ClipboardContent object
+            ClipboardContent content = new ClipboardContent();
+            content.putString(textToCopy);
+
+            // Get the system clipboard
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+
+            // Set the content to the clipboard
+            clipboard.setContent(content);
+        });
+        p1.getChildren().add(additionalText);
+        p1.getChildren().add(copyButton);
+        copyButton.setLayoutX(250); // Set x position
+        copyButton.setLayoutY(435);
+        con.setLayoutX(250);
+        con.setLayoutY(550);
+        select.setLayoutX(350);
+        select.setLayoutY(550);
+
+        myImagePosition currPos = new myImagePosition();
+        currPos.myCubes = Extractor.myCubes;
+        currPos.axis = GetMyImageAlongAxe.chosenAxe;
+        savedArray.add(currPos);
+        addCubeToOneGrid(p1, currPos.axis, batch);
+
+        return p1;
+    }
+
+    public static Pane exportPaneWithQi(String axis, int batch,double additive,Map<String,Double> grid,Map<String, Integer> sizeGrid){
+
+        Group root = new Group();
+        CheckBox con = new CheckBox("Connect");
+        CheckBox select = new CheckBox("Select");
+        con.setOnAction(action -> {
+            if(!con.isSelected()){
+                connect = new int[][]{{},{}};
+                System.out.println(Arrays.deepToString(connect));
+            }
+        });
+        Pane p1 = makeGrid(40,1,con,select);
+        p1.setOnMouseClicked(e -> {
+            int x = (int)e.getX()/10;
+            int y = (int)e.getY()/10;
+            if(GridPage.createOption[0] == 0){
+                /**/xorz = 1;
+                DrawSquare(p1,(int)e.getX()/10,(int)e.getY()/10,con,select);
+            }else if(GridPage.createOption[1] == 1){
+                Robot robot = null;
+                try {
+                    robot = new Robot();
+                } catch (AWTException ex) {
+                    ex.printStackTrace();
+                }
+                Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+                int mouseX = (int) mouseLocation.getX();
+                int mouseY = (int) mouseLocation.getY();
+
+                // Capture a screenshot
+                BufferedImage screenCapture = robot.createScreenCapture(new java.awt.Rectangle(mouseX, mouseY, 1, 1));
+                java.awt.Color pixelColor = new java.awt.Color(screenCapture.getRGB(0, 0));
+
+                ColorSelector.setColor(awtToJavaFXColor(pixelColor));
+            }else if (GridPage.createOption[1] == 3){
+                Pane toAdd = test(new Pane(), 400, 400, (int) p1.getLayoutX());
+                p1.setBackground(new javafx.scene.layout.Background(new javafx.scene.layout.BackgroundFill(Color.BLUE, null, null)));
+                p1.getChildren().add(toAdd);
+            }else if(makeConnection){
+                if(myConnector.size() < 2){
+                    Tracker t = Tracker.findClosestTracker(theMainExtratorArr,e.getX(),e.getY(),axis,batch);
+                    myConnector.add(theMainExtratorArr.indexOf(t));
+                    if(myConnector.size() == 2) {
+                        Tracker.mergeTrackers(theMainExtratorArr, myConnector.get(0), myConnector.get(1));
+                        makeConnection = false;
+                        myConnector.clear();
+                    }
+                }
+            }
+        });
+        Text additionalText = new Text("Batch:"+batch);
+        additionalText.setFill(Color.rgb((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)));
+        additionalText.setLayoutX(100); // Set x position
+        additionalText.setLayoutY(450); // Set y position
+        additionalText.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;"); // Set font style
+        updatedPane.put(batch,p1);
+        // Add the additional text to the pane
+
+        root.getChildren().add(p1);
+        Button copyButton = new Button("Copy QI");
+
+        // Set up the button action
+        copyButton.setOnAction(event -> {
+            // The string you want to copy to the clipboard
+            String textToCopy = "{\n" +
+                    "path:"+GetMyImageAlongAxe.path+";\n"+
+                    "chosenAxe:"+GetMyImageAlongAxe.chosenAxe+";\n" +
+                    "additive:"+additive+";\n" +
+                    "val:" +grid.get("posX")+","+grid.get("posY")+
+                    ","+sizeGrid.get("gridX")+","+sizeGrid.get("gridY")+";\n" +
+                    "}";
+
+            // Create a ClipboardContent object
+            ClipboardContent content = new ClipboardContent();
+            content.putString(textToCopy);
+
+            // Get the system clipboard
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+
+            // Set the content to the clipboard
+            clipboard.setContent(content);
+        });
+        p1.getChildren().add(additionalText);
+        p1.getChildren().add(copyButton);
+        copyButton.setLayoutX(250); // Set x position
+        copyButton.setLayoutY(435);
         con.setLayoutX(250);
         con.setLayoutY(550);
         select.setLayoutX(350);

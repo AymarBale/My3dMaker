@@ -4,6 +4,7 @@ package groupCreatorSyntax;
 import ColorsPaletteExtraction.Tracker;
 import Grid.GridPage;
 import Utils3DCreation.com.Rules;
+import Utils3DCreation.com.Utils;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -32,12 +33,6 @@ import static groupCreatorSyntax.SyntaxDetector.*;
 public class CodingEditor extends Application {
     public static int width = 400;
     public static int height = 700;
-    private double anchorX,anchorY;
-    private double anchorAngleX = 0;
-    private double anchorAngleY = 0;
-    private final DoubleProperty angleX = new SimpleDoubleProperty(0);
-    private final DoubleProperty angleY = new SimpleDoubleProperty(0);
-    /* <----------------------------------------------------------------> */
     private double anchrX;
     private double anchrY;
     private double anchr_angX = 0;
@@ -70,33 +65,35 @@ public class CodingEditor extends Application {
                 copyArrayList.add(deepCopyTracker(tracker));
             }
             if(!(text.getText().equals(""))){
+                //Utils.UpdateSquares();
+                getAllBacth(copyArrayList,text.getText());
+                if(text.getText().contains("GROUPNAME")){
+                    ArrayList<Circle> points = new ArrayList<>();
+                    String textVal = text.getText();
+                    createCirclesFromCoordinates(extractCornerLine(textVal),points);
+                    Polygon poly = createPolyWithText(points);
 
-                ArrayList<Circle> points = new ArrayList<>();
-                String textVal = text.getText();
-                createCirclesFromCoordinates(extractCornerLine(textVal),points);
-                Polygon poly = createPolyWithText(points);
+                    MyTextGroup textGroup = convertGroups(textVal);
 
-                MyTextGroup textGroup = convertGroups(textVal);
-
-                for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
-                    if ((poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) |
-                            (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y + 5))|
-                            (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y - 5))|
-                            (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y - 5))|
-                            (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y + 5))) &&
-                            GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
-
-                        GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
-                        copyArrayList.get(i).z = textGroup.valAxis;
-                        ruleArr.add(GridPage.theMainExtratorArr.get(i));
-                        vizualiseRuleArr.add(copyArrayList.get(i));
-                    }else {
-                        if(GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
-                            System.out.println("Not Inside --->:"+GridPage.theMainExtratorArr.get(i).x +" "+GridPage.theMainExtratorArr.get(i).y+"<---");
+                    for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
+                        if ((poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) |
+                                (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y + 5))|
+                                (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                                (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                                (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y + 5))) &&
+                                GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+                            GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
+                            copyArrayList.get(i).z = textGroup.valAxis;
+                            ruleArr.add(GridPage.theMainExtratorArr.get(i));
+                            vizualiseRuleArr.add(copyArrayList.get(i));
+                        }else {
+                            if(GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+                                System.out.println("Not Inside --->:"+GridPage.theMainExtratorArr.get(i).x +" "+GridPage.theMainExtratorArr.get(i).y+"<---");
+                            }
                         }
                     }
+                    detectRule(textVal,ruleArr,vizualiseRuleArr);
                 }
-                detectRule(textVal,ruleArr,vizualiseRuleArr);
             }
             trackerGroup.getChildren().clear();
             for (Tracker tracker : copyArrayList) {

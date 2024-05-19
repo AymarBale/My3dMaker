@@ -1,5 +1,6 @@
 package ImageTaker;
 
+import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 
 public class AdvanceTab extends Tab {
@@ -9,9 +10,5 @@ public class AdvanceTab extends Tab {
     public AdvanceTab(String s) {
         super();
         setText(s);
-    }
-
-    public AdvanceTab(){
-
     }
 }

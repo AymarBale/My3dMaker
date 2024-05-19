@@ -1,14 +1,18 @@
 package Utils3DCreation.com;
 import ColorsPaletteExtraction.Extractor;
 import ColorsPaletteExtraction.Tracker;
+import Grid.GridPage;
 import Grid.PositionUtility;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+
+import static Grid.PositionUtility.makeGrid;
 
 public class Utils {
         public static int faceCount = 0;
@@ -212,7 +216,7 @@ public class Utils {
             return materials;
         }
 
-    private static void removeStringFromFile(String filePath, String stringToRemove) {
+        private static void removeStringFromFile(String filePath, String stringToRemove) {
         if(stringToRemove.trim().length() != 0){
             File file = new File(filePath);
             StringBuilder contentBuilder = new StringBuilder();
@@ -231,6 +235,31 @@ public class Utils {
                 writer.write(contentBuilder.toString());
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public static void updateSquares(int batch) {
+        // Check if the batch number exists in the map
+        if (GridPage.updatedPane.containsKey(batch)) {
+            Pane paneToRemove = GridPage.updatedPane.get(batch);
+            paneToRemove.getChildren().removeIf(node -> {
+                if (node instanceof Rectangle) {
+                    Rectangle rectangle = (Rectangle) node;
+                    Paint fill = rectangle.getFill(); // Get the fill color of the rectangle
+                    // Check if the fill is set to any color
+                    return fill != null && !fill.equals(Color.TRANSPARENT); // Remove if fill is not transparent
+                }
+                return false; // Keep non-rectangle nodes
+            });
+            for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
+                Tracker tracker = GridPage.theMainExtratorArr.get(i);
+                if (tracker.batch == batch) {
+                    // Create a rectangle and add it to the pane
+                    Rectangle rectangle = new Rectangle(tracker.x, tracker.y, 10, 10); // Example dimensions
+                    rectangle.setFill(tracker.col);
+                    paneToRemove.getChildren().add(rectangle);
+                }
             }
         }
     }

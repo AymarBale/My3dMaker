@@ -24,75 +24,95 @@ public class GetMyImageAlongAxe extends Application {
     public static String sign = "";
     @Override
     public void start(Stage stage){
-        Group root = new Group();
-        Rectangle line = new Rectangle(600,5);
-        Button chooseFile = new Button("Choose the file you want ");
+        if(QuickImport.allQImport.isEmpty()) {
+            Group root = new Group();
+            Rectangle line = new Rectangle(600, 5);
+            Button chooseFile = new Button("Choose the file you want ");
 
-        FileChooser fileChooser = new FileChooser();
-        Button butX = new Button("AxeX");Button butY = new Button("AxeY");Button butZ = new Button("AxeZ");
-        butX.setStyle("-fx-font-size: 2em;");butY.setStyle("-fx-font-size: 2em;");butZ.setStyle("-fx-font-size: 2em;");
-        butX.setLayoutY(250);butY.setLayoutY(250);butZ.setLayoutY(250);
-        butX.setLayoutX(200);butY.setLayoutX(300);butZ.setLayoutX(400);
-        chooseFile.setLayoutX(275);chooseFile.setLayoutY(500);
-        line.setY(350);line.setX(50);
-        importer.setLayoutY(575);importer.setLayoutX(300);
-        chooseFile.setOnAction(event -> {
-            File selectedFile = fileChooser.showOpenDialog(stage);
-            path = selectedFile.getPath();
-        });
-        butX.setOnAction(event -> {
-            butX.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigProfileCrop.png";//
-            chosenAxe = "X";
-            butY.setLayoutY(250);
-            butZ.setLayoutY(250);
-        });
-        butY.setOnAction(event -> {
-            butY.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigTop.png";//
-            chosenAxe = "Y";
-            butX.setLayoutY(250);
-            butZ.setLayoutY(250);
-        });
-        butZ.setOnAction(event -> {
-            butZ.setLayoutY(375);
-            path = "C:\\Users\\aymar\\Downloads\\pig3d\\pigFace.png";//
-            chosenAxe = "Z";
+            FileChooser fileChooser = new FileChooser();
+            Button butX = new Button("AxeX");
+            Button butY = new Button("AxeY");
+            Button butZ = new Button("AxeZ");
+            butX.setStyle("-fx-font-size: 2em;");
+            butY.setStyle("-fx-font-size: 2em;");
+            butZ.setStyle("-fx-font-size: 2em;");
             butX.setLayoutY(250);
             butY.setLayoutY(250);
-        });
+            butZ.setLayoutY(250);
+            butX.setLayoutX(200);
+            butY.setLayoutX(300);
+            butZ.setLayoutX(400);
+            chooseFile.setLayoutX(275);
+            chooseFile.setLayoutY(500);
+            line.setY(350);
+            line.setX(50);
+            importer.setLayoutY(575);
+            importer.setLayoutX(300);
+            chooseFile.setOnAction(event -> {
+                File selectedFile = fileChooser.showOpenDialog(stage);
+                path = selectedFile.getPath();
+            });
+            butX.setOnAction(event -> {
+                butX.setLayoutY(375);
+                chosenAxe = "X";
+                butY.setLayoutY(250);
+                butZ.setLayoutY(250);
+            });
+            butY.setOnAction(event -> {
+                butY.setLayoutY(375);
+                chosenAxe = "Y";
+                butX.setLayoutY(250);
+                butZ.setLayoutY(250);
+            });
+            butZ.setOnAction(event -> {
+                butZ.setLayoutY(375);
+                chosenAxe = "Z";
+                butX.setLayoutY(250);
+                butY.setLayoutY(250);
+            });
 
-        importer.setOnAction(event -> {
-            try {
-                chosenAxe = sign + chosenAxe;
-                stage.close();
-                Stage secondWindow = new Stage();
-                Extractor e = new Extractor();
-                Extractor.imagePath = path;
-                e.start(secondWindow);
-                secondWindow.setTitle("extractor Test page");
-                secondWindow.show();
-                Extractor.QuickShort(secondWindow);//            ------------------------> change for quicksort
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        stage.setOnCloseRequest(event -> {
-            if (!tabPane.getTabs().isEmpty()) {
-                tabPane.getTabs().remove(tabPane.getTabs().size() - 1);
-                if(EditorSettings.i >= 0)
-                EditorSettings.i -= 1;
-            }
-            // You can perform further actions here
-        });
-        root.getChildren().add(butX);root.getChildren().add(butY);root.getChildren().add(butZ);
-        root.getChildren().add(line);
-        root.getChildren().add(chooseFile);
-        root.getChildren().add(importer);
-        Scene scene = new Scene(root, 700, 700);
-        stage.setScene(scene);
-        stage.setTitle("import Picture"+GetMyImageAlongAxe.count);
-        stage.show();
+            importer.setOnAction(event -> {
+                try {
+                    chosenAxe = sign + chosenAxe;
+                    stage.close();
+                    Stage secondWindow = new Stage();
+                    Extractor e = new Extractor();
+                    Extractor.imagePath = path;
+                    e.start(secondWindow);
+                    secondWindow.setTitle("extractor Test page");
+                    secondWindow.show();
+                    //Extractor.QuickShort(secondWindow);            ------------------------> change for quicksort
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            stage.setOnCloseRequest(event -> {
+                if (!tabPane.getTabs().isEmpty()) {
+                    tabPane.getTabs().remove(tabPane.getTabs().size() - 1);
+                    if (EditorSettings.i >= 0)
+                        EditorSettings.i -= 1;
+                }
+                // You can perform further actions here
+            });
+            root.getChildren().add(butX);
+            root.getChildren().add(butY);
+            root.getChildren().add(butZ);
+            root.getChildren().add(line);
+            root.getChildren().add(chooseFile);
+            root.getChildren().add(importer);
+            Scene scene = new Scene(root, 700, 700);
+            stage.setScene(scene);
+            stage.setTitle("import Picture" + GetMyImageAlongAxe.count);
+            stage.show();
+        }else {
+            chosenAxe = QuickImport.allQImport.get(0).chosenAxe;
+            path = QuickImport.allQImport.get(0).path;
+            Stage secondWindow = new Stage();
+            Extractor e = new Extractor();
+            Extractor.imagePath = path;
+            e.start(secondWindow);
+            Extractor.QuickShort(secondWindow,QuickImport.allQImport.get(0));
+        }
         //QuickSort(importer,stage);
     }
     public static void main(String[] args) {

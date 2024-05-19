@@ -4,6 +4,7 @@ package groupCreatorSyntax;
 import ColorsPaletteExtraction.Tracker;
 import Grid.GridPage;
 import Selector.LineSelector;
+import Utils3DCreation.com.Utils;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.Group;
@@ -159,6 +160,100 @@ public class SyntaxDetector extends Application {
         MyTextGroup t = new MyTextGroup(groupName, valAxis, axis, corner, batch, color);
 
         return t;
+    }
+    public static void getAllBacth(ArrayList<Tracker> cTrackers,String input){
+        String[] parts = input.split("\\}");
+
+        // Store each part in an ArrayList
+        ArrayList<String> partsList = new ArrayList<>();
+        for (String part : parts) {
+            partsList.add(part.trim() + "}"); // Add back the "}" character removed by split
+        }
+
+        // Print the ArrayList
+        for (String part : partsList) {
+            batchRP(cTrackers,part);
+        }
+    }
+
+    public static void batchRP(ArrayList<Tracker> cTrackers,String input) {
+        // Check if the input contains the necessary substrings
+        ArrayList<String> characters = getFirstLetterAfterSecondSemicolon(input);
+        if (!input.contains("batchRp(") || !input.contains("UAxis:") || !input.contains(characters.get(0)+":") || !input.contains(characters.get(1)+":")) {
+            // Handle the case where any of the required substrings are missing
+            throw new IllegalArgumentException("Input string does not contain all required components.");
+        }
+
+        // Extract groupName
+        int groupNameStartIndex = input.indexOf("batchRp(") + 8; // Start index of batchRp(
+        int groupNameEndIndex = input.indexOf(")", groupNameStartIndex); // End index of batchRp(
+        String batch = input.substring(groupNameStartIndex, groupNameEndIndex);
+
+        // Extract valAxis
+        int valAxisStartIndex = input.indexOf("UAxis:") + 6; // Start index of UAxis:
+        int valAxisEndIndex = input.indexOf(";", valAxisStartIndex); // End index of UAxis:
+        String valAxis = input.substring(valAxisStartIndex, valAxisEndIndex).trim();
+
+        // Extract X
+        int xStartIndex = input.indexOf(characters.get(0)+":") + 2; // Start index of X:
+        int xEndIndex = input.indexOf(";", xStartIndex); // End index of X:
+        String x = input.substring(xStartIndex, xEndIndex).trim();
+
+        // Extract Y
+        int yStartIndex = input.indexOf(characters.get(1)+":") + 2; // Start index of Y:
+        int yEndIndex = input.indexOf(";", yStartIndex); // End index of Y:
+        String y = input.substring(yStartIndex, yEndIndex).trim();
+        updateTrackersWithBatch(cTrackers,valAxis,Integer.parseInt(x),Integer.parseInt(y),Integer.parseInt(batch));
+        Utils.updateSquares(Integer.parseInt(batch));
+    }
+
+    public static ArrayList<String> getFirstLetterAfterSecondSemicolon(String input) {
+        ArrayList<String> axisBatchP = new ArrayList<>();
+        int firstSemicolonIndex = input.indexOf(';');
+        if (firstSemicolonIndex == -1) {
+            throw new IllegalArgumentException("Semicolon not found in input string.");
+        }
+        while (firstSemicolonIndex < input.length() - 1 && Character.isWhitespace(input.charAt(firstSemicolonIndex + 1))) {
+            firstSemicolonIndex++;
+        }
+        axisBatchP.add(String.valueOf(input.charAt(firstSemicolonIndex+1)));
+
+        // Find the index of the second semicolon
+        int secondSemicolonIndex = input.indexOf(';', firstSemicolonIndex + 1);
+        if (secondSemicolonIndex == -1) {
+            throw new IllegalArgumentException("Second semicolon not found in input string.");
+        }
+
+        // Get the letter after the second semicolon
+        while (secondSemicolonIndex < input.length() - 1 && Character.isWhitespace(input.charAt(secondSemicolonIndex + 1))) {
+            secondSemicolonIndex++;
+        }/**/
+        axisBatchP.add(String.valueOf(input.charAt(secondSemicolonIndex+1)));
+        return axisBatchP;
+    }
+
+    public static void updateTrackersWithBatch(ArrayList<Tracker> copyTrackers,String uAxisValue, int xValue, int yValue, int batchValue) {
+        for (int i = 0; i < GridPage.theMainExtratorArr.size();i++) {
+            Tracker tracker = GridPage.theMainExtratorArr.get(i);
+            Tracker copyTracker = copyTrackers.get(i);
+            if (uAxisValue.equals("Z") && tracker.batch == batchValue) {
+                tracker.x += xValue*10;
+                tracker.y += yValue*10;
+                copyTracker.x += (xValue*10);
+                copyTracker.y += (yValue*10);
+            }else if (uAxisValue.equals("X") && tracker.batch == batchValue) {
+                tracker.x += xValue*10;
+                tracker.y += yValue*10;
+                copyTracker.x += (xValue*10);
+                copyTracker.y += (yValue*10);
+            }else if (uAxisValue.equals("Y") && tracker.batch == batchValue) {
+                tracker.x += xValue*10;
+                tracker.y += yValue*10;
+                copyTracker.x += (xValue*10);
+                copyTracker.y += (yValue*10);
+            }
+        }
+
     }
 
     public static String extractCornerLine(String input) {
