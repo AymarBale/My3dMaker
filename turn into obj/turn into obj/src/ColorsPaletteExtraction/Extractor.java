@@ -29,6 +29,8 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static Editor.EditorSettings.*;
@@ -49,7 +51,8 @@ public class Extractor extends Application {
 
     private static double startX;
     private static double startY;
-
+    public static Map<String,Double> grid = new HashMap<>();
+    public static Map<String, Integer> sizeGrid = new HashMap<>();
 
     @Override
     public void start(Stage stage) {
@@ -117,10 +120,12 @@ public class Extractor extends Application {
 
         gridSizeX.setOnAction(event -> {
             myGridSizeX = Integer.parseInt(gridSizeTextX.getText());
+            sizeGrid.put("gridX",myGridSizeX);
         });
 
         gridSizeY.setOnAction(event -> {
             myGridSizeY = Integer.parseInt(gridSizeTextY.getText());
+            sizeGrid.put("gridY",myGridSizeY);
         });
         getAllPos.setOnAction(event -> {
             opt.set(1);
@@ -140,12 +145,13 @@ public class Extractor extends Application {
             public void changed(ObservableValue<?extends Number> observable, Number oldValue, Number newValue){
                 rectGroup.getChildren().clear();
                 numLabel.setText(String.valueOf(newValue));
-                additiveX = (double) newValue;
+                additiveX = newValue.doubleValue();
             }
         });
         sliderX.setOnMouseReleased(event -> {
             rectGroup.getChildren().clear();
             numLabel.setText(String.valueOf(additiveX));
+
             GridL(currentPos[0],currentPos[1]/*10,10*/,myGridSizeX,myGridSizeY);//13.3
         });
 
@@ -308,6 +314,8 @@ public class Extractor extends Application {
     public static void QuickShort(Stage s, QuickImport qi){
         if(GetMyImageAlongAxe.chosenAxe.equals(qi.chosenAxe)){
             additiveX = qi.additive;
+            grid.put("gridX",qi.val.get("gridX"));grid.put("gridY",qi.val.get("gridY"));
+            sizeGrid.put("sizeX",((Number) qi.val.get("sizeX")).intValue());sizeGrid.put("sizeY",((Number) qi.val.get("sizeY")).intValue());
             GridL(qi.val.get("gridX"),qi.val.get("gridY"),((Number) qi.val.get("sizeX")).intValue(),((Number) qi.val.get("sizeY")).intValue());
             AddCubesToSender();
             timeToRemake();
@@ -323,14 +331,14 @@ public class Extractor extends Application {
     }
     private static void openSecondStage(Stage innerStage) throws Exception {
         innerStage.close();
-
         AdvanceTab tab = createTab(EditorSettings.i,tabPane,secondaryStage);
         tab.setText(tab.getText()+" AXIS:"+GetMyImageAlongAxe.chosenAxe);
         tab.batch = EditorSettings.batchCount;
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
         EditorSettings.i++;
-        tab.setContent(GridPage.exportPane(GetMyImageAlongAxe.chosenAxe,tab.batch));
+        grid.put("posX",currentPos[0]);grid.put("posY",currentPos[1]);
+        tab.setContent(GridPage.exportPaneWithQi(GetMyImageAlongAxe.chosenAxe,tab.batch,additiveX,grid,sizeGrid));
         EditorSettings.batchCount += 11;
 
         if(!allQImport.isEmpty()){
@@ -341,10 +349,7 @@ public class Extractor extends Application {
                 useQI();
             }
         }
-
         ResetVariables();
-
-
     }
 
     public static void ResetVariables(){
@@ -357,6 +362,8 @@ public class Extractor extends Application {
         myGridSizeY = 10;
         currentPos = new double[]{0, 0};
         imag = null;
+        grid = new HashMap<>();
+        sizeGrid = new HashMap<>();
     }
 
 }

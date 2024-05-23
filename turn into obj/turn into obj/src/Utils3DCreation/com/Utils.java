@@ -240,7 +240,6 @@ public class Utils {
     }
 
     public static void updateSquares(int batch) {
-        // Check if the batch number exists in the map
         if (GridPage.updatedPane.containsKey(batch)) {
             Pane paneToRemove = GridPage.updatedPane.get(batch);
             paneToRemove.getChildren().removeIf(node -> {

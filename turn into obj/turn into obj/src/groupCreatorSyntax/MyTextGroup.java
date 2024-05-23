@@ -1,5 +1,11 @@
 package groupCreatorSyntax;
 
+import ColorsPaletteExtraction.Tracker;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MyTextGroup {
     String groupName;
     int valAxis;
@@ -19,6 +25,31 @@ public class MyTextGroup {
         this.corner = corner;
         this.batch = batch;
         this.color = color;
+    }
+
+
+
+    public static ArrayList<String> getAllGroups(String input) {
+        String[] allLines = input.split("\n");
+        ArrayList<String> groupNames = new ArrayList<>();
+        // Loop through each line in the input
+        for (int i = 0; i < allLines.length; i++) {
+            if (allLines[i].contains("G")) {
+                StringBuilder t = new StringBuilder();
+
+                // Process the lines after the keyword
+                for (int j = i; j < Math.min(i + 6 + 1, allLines.length); j++) {
+                    t.append(allLines[j]).append("\n");
+                }
+
+                // Print or process the extracted lines
+                groupNames.add(String.valueOf(t));
+
+                // Remove the extracted lines from the input
+                input = input.replace(t.toString(), "");
+            }
+        }
+        return groupNames;
     }
 
     @Override

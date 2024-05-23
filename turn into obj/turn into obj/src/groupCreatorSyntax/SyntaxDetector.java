@@ -6,16 +6,13 @@ import Grid.GridPage;
 import Selector.LineSelector;
 import Utils3DCreation.com.Utils;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -161,28 +158,33 @@ public class SyntaxDetector extends Application {
 
         return t;
     }
-    public static void getAllBacth(ArrayList<Tracker> cTrackers,String input){
-        String[] parts = input.split("\\}");
+    //Not Inside --->:
+    public  static void getAllBatchs(ArrayList<Tracker> cTrackers,String input){
+        String[] allLines = input.split("\n");
+        ArrayList<String> individualBatchs = new ArrayList<>();
+        // Loop through each line in the input
+        for (int i = 0; i < allLines.length; i++) {
+            if (allLines[i].contains("batchRp(")) {
+                StringBuilder t = new StringBuilder();
 
-        // Store each part in an ArrayList
-        ArrayList<String> partsList = new ArrayList<>();
-        for (String part : parts) {
-            partsList.add(part.trim() + "}"); // Add back the "}" character removed by split
-        }
+                // Process the lines after the keyword
+                for (int j = i; j < Math.min(i + 5 + 1, allLines.length); j++) {
+                    t.append(allLines[j]).append("\n");
+                }
 
-        // Print the ArrayList
-        for (String part : partsList) {
-            batchRP(cTrackers,part);
+                // Print or process the extracted lines
+                individualBatchs.add(String.valueOf(t));
+                batchRP(cTrackers, String.valueOf(t));
+                // Remove the extracted lines from the input
+                input = input.replace(t.toString(), "");
+            }
         }
     }
 
     public static void batchRP(ArrayList<Tracker> cTrackers,String input) {
         // Check if the input contains the necessary substrings
         ArrayList<String> characters = getFirstLetterAfterSecondSemicolon(input);
-        if (!input.contains("batchRp(") || !input.contains("UAxis:") || !input.contains(characters.get(0)+":") || !input.contains(characters.get(1)+":")) {
-            // Handle the case where any of the required substrings are missing
-            throw new IllegalArgumentException("Input string does not contain all required components.");
-        }
+
 
         // Extract groupName
         int groupNameStartIndex = input.indexOf("batchRp(") + 8; // Start index of batchRp(
@@ -252,25 +254,34 @@ public class SyntaxDetector extends Application {
                 copyTracker.x += (xValue*10);
                 copyTracker.y += (yValue*10);
             }
-        }
 
+        }
     }
 
     public static String extractCornerLine(String input) {
-        String pattern = "Corner:\\s*\\{\\s*((\\[\\s*-?\\d+\\s*,\\s*-?\\d+\\s*\\]\\s*,?\\s*)*)\\};\\s*";
-
-        // Create a Pattern object
-        Pattern regex = Pattern.compile(pattern, Pattern.DOTALL); // Enable DOTALL mode to match across lines
-
-        // Create a Matcher object
-        Matcher matcher = regex.matcher(input);
-
-        // Check if the pattern is found
-        if (matcher.find()) {
-            return matcher.group(1); // Return the first capturing group which contains all the points
-        } else {
+        // Find the start index of the "Corner" section
+        int cornerStartIndex = input.indexOf("Corner:");
+        if (cornerStartIndex == -1) {
             return "Corner line not found in the input.";
         }
+
+        // Find the start index of the opening brace '{' after "Corner:"
+        int braceStartIndex = input.indexOf("{", cornerStartIndex);
+        if (braceStartIndex == -1) {
+            return "Opening brace for Corner section not found.";
+        }
+
+        // Find the end index of the closing brace '}' for the "Corner" section
+        int braceEndIndex = input.indexOf("}", braceStartIndex);
+        if (braceEndIndex == -1) {
+            return "Closing brace for Corner section not found.";
+        }
+
+        // Extract the substring containing the points
+        String pointsString = input.substring(braceStartIndex + 1, braceEndIndex).trim();
+
+        // Return the extracted points string
+        return pointsString;
     }
 
     public static ArrayList<String> extractGroupNames(String input) {
@@ -294,7 +305,7 @@ public class SyntaxDetector extends Application {
         for (String pair : pairs) {
             pair = pair.replaceAll("[\\[\\]]", "");
             String[] coords = pair.split(",");
-
+            //Corner line not found in the input
             double x = Double.parseDouble(coords[0]);
             double y = Double.parseDouble(coords[1]);
             //Corner line not found in the input.

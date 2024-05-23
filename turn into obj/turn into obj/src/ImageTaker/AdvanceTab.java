@@ -11,12 +11,4 @@ public class AdvanceTab extends Tab {
         super();
         setText(s);
     }
-
-
-
-
-    /*public Parent getParent() {
-        // Call the superclass's getParent() method
-        return getParent();
-    }*/
 }
