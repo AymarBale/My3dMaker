@@ -1,6 +1,9 @@
 package testingFunction;
 
+import ColorsPaletteExtraction.Tracker;
+import Grid.GridPage;
 import ImageTaker.QuickImport;
+import groupCreatorSyntax.SyntaxDetector;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -14,49 +17,70 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Circle;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static groupCreatorSyntax.CodingEditor.deepCopyTracker;
+import static groupCreatorSyntax.SyntaxDetector.*;
 import static javafx.application.Application.launch;
 
-public class TestingFunc extends Application {
-    @Override
-    public void start(Stage primaryStage) {
-        // Create a button
-        Button copyButton = new Button("Copy Text");
+public class TestingFunc {
+    public static ArrayList<String> extractGroupNames(String input) {
+        ArrayList<String> groupNames = new ArrayList<>();
 
-        // Set up the button action
-        copyButton.setOnAction(event -> {
-            // The string you want to copy to the clipboard
-            String textToCopy = "Hello, this text will be copied to the clipboard!";
+        // Regular expression to match "GROUPNAME" sections
+        Pattern pattern = Pattern.compile("GROUPNAME\\(.*?\\)\\{[^\\}]*\\}");
+        Matcher matcher = pattern.matcher(input);
 
-            // Create a ClipboardContent object
-            ClipboardContent content = new ClipboardContent();
-            content.putString(textToCopy);
-
-            // Get the system clipboard
-            Clipboard clipboard = Clipboard.getSystemClipboard();
-
-            // Set the content to the clipboard
-            clipboard.setContent(content);
-        });
-
-        // Create a layout and add the button to it
-        VBox root = new VBox(10, copyButton);
-
-        // Create a scene with the layout
-        Scene scene = new Scene(root, 300, 200);
-
-        // Set up the stage
-        primaryStage.setTitle("Copy to Clipboard Example");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        while (matcher.find()) {
+            groupNames.add(matcher.group());
+        }
+        //"nathan"
+        return groupNames;
     }
 
+
     public static void main(String[] args) {
-        launch(args);
+        String input = "GROUPNAME(back){\n" +
+                "valAxis: 9;\n" +
+                "axis: X;\n" +
+                "Corner: {[10,10],[10,10],[10,90],[90,90],[90,10]};\n" +
+                "batch: 44;\n" +
+                "color: #FFFFFF;\n" +
+                "}\n" +
+                "GROUPNAME(left){\n" +
+                "valAxis: 9;\n" +
+                "axis: Z;\n" +
+                "Corner: {[10,10],[10,10],[80,10],[80,90],[10,90]};\n" +
+                "batch: 55;\n" +
+                "color: #FFFFFF;\n" +
+                "}\n" +
+                "GROUPNAME(Bottom){\n" +
+                "valAxis: 8;\n" +
+                "axis: Y;\n" +
+                "Corner: {[10,10],[10,10],[10,70],[70,70],[70,10]};\n" +
+                "batch: 66;\n" +
+                "color: #FFFFFF;\n" +
+                "}\n" +
+                "batchRp(22){\n" +
+                "  UAxis:Y;\n" +
+                "  X:1;\n" +
+                "  Z:0;\n" +
+                "}";
+        ArrayList<Tracker> copyArrayList = new ArrayList<>();
+        for (Tracker tracker : GridPage.theMainExtratorArr) {
+            copyArrayList.add(deepCopyTracker(tracker));
+        }
+        if (input.contains("batchRp(")){
+            getAllBatchs(copyArrayList,input);
+        }
+
+        //System.out.println();
     }
 }
 

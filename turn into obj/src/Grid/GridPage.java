@@ -604,7 +604,7 @@ public class GridPage extends Application{
         });
         p1.getChildren().add(additionalText);
         p1.getChildren().add(copyButton);
-        copyButton.setLayoutX(250); // Set x position
+        copyButton.setLayoutX(275); // Set x position
         copyButton.setLayoutY(435);
         con.setLayoutX(250);
         con.setLayoutY(550);
@@ -702,7 +702,6 @@ public class GridPage extends Application{
         byColor.setLayoutY(25);byLine.setLayoutY(50);bySquare.setLayoutY(75);finish.setLayoutY(140);
         byColor.setLayoutX(25);byLine.setLayoutX(25);bySquare.setLayoutX(25);t.setLayoutX(10);
         finish.setLayoutX(0);
-        /**/
         finish.setOnAction(value ->  {
             p.getChildren().remove(g);
             curr.setLayoutY(100);

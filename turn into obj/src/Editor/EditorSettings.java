@@ -34,7 +34,7 @@ public class EditorSettings extends Application {
     public static TabPane tabPane = new TabPane();
     Button sub = new Button("SUBMIT");
     static Group g = new Group();
-    public static Scene scene = new Scene(g, 800,600 );
+    public static Scene scene = new Scene(g, 800,600);
     public static Button btn = new Button("+");
     public static Button importTextbtn = new Button("use import text");
     public static AtomicReference<Tab> addedTab = new AtomicReference<>(new Tab());
@@ -43,10 +43,11 @@ public class EditorSettings extends Application {
     public static int i = 1;
     AtomicInteger finalI = new AtomicInteger(i);
     public static Stage secondaryStage = new Stage();
+    public static TextArea importText = new TextArea();
     @Override
     public void start(Stage primaryStage) {
         secondaryStage.setTitle("Multiple Tab Window");
-        TextArea importText = new TextArea();
+
         importText.setStyle("-fx-control-inner-background: #ffd700;");
         importText.setStyle("-fx-control-inner-background:#352F44; -fx-font-family: Monospace; -fx-highlight-fill: #ffd700; -fx-highlight-text-fill: #000000; -fx-text-fill: #ffd700; ");
         importText.setPadding(new Insets(5));
@@ -135,6 +136,8 @@ public class EditorSettings extends Application {
                     arrL.add(oldTab.getText());
                     arrL.add(newTab.getText());
                     tabPane.setPrefSize(1100,600);
+                    importTextbtn.setVisible(false);
+                    importText.setVisible(false);
                     oldTab.setText(oldTab.getText()+" + "+newTab.getText());
                     mergedAxe = extractCharacter(oldTab.getText())+extractCharacter(newTab.getText());
                     oldTab.setContent(new Pane());
@@ -147,6 +150,8 @@ public class EditorSettings extends Application {
             }
         });
         mSplit.setOnAction((event) -> {
+            importTextbtn.setVisible(true);
+            importText.setVisible(true);
             updatedPane.clear();
             mergedAxe = "";
             int secondNumber = extractSecondNumber(tab.getText());
@@ -158,7 +163,8 @@ public class EditorSettings extends Application {
             otherTab.setText(arrL.get(1));
             otherTab.setContent((Node)spliter.get(1));
             tabPane.getTabs().add(secondNumber-1,otherTab);
-            a.setWidth(600);
+            a.setWidth(815);
+            a.setHeight(640);
             btn.setLayoutX(550);
         });
         contextMenu.getItems().addAll(merge,mSplit);

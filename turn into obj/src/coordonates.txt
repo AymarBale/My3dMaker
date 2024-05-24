@@ -1,13 +1,8 @@
-left x = 3,nez = 1,eyes + skin = 2,ear = 4
-do the connection with the right
-ear of right to front of left
-right x = 2, z = 1 ears ,feets = 3
-left back = 8
-right back = 8
-ear of right to back of left
+Issues 
+-y axis{when using batchs}
+-separation on the script
+-count for batch {add something tha will allow me to use the batchs on time}
 
-thing left to do{
- -group and rules
- -simili
-}
-
+Left To Do 
+-other image
+-rule testing
