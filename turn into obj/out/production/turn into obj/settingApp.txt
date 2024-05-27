@@ -1,0 +1,59 @@
+
+
+Left To Do 
+-other image
+-rule testing
+
+group :
+    GROUPNAME(value){
+    valAxis: value;
+    axis: value;
+    Corner: {[value,value],[value,value],[value,value],[value,value],[value,value]};
+    batch: value;
+    color: value;
+    }
+    used to modify an image in their undisclosed axis example if the axis is X and Y
+    you can modify it the Z axis of the image using this syntax
+
+Rules:
+    GROUPNAME(test){
+    valAxis: 3;
+    axis: X;
+    Corner: {[20,20],[20,40],[40,40],[40,20]};
+    batch: 11;
+    color: #FFFFFF;
+    rules: {[1 ++ only|20,25|30,25]};
+    }
+    the rules are a more advanced variations of the groups that can allow you to modify
+    the undisclosed axis inside a group .You can add this line:
+        rules: {[1 ++ only|20,25|30,25]};
+    the first part : 1 ++ only mean that we had one to the position of each tracker in the
+    undisclosed axis but incrementally so first 1 will be added then 2 then 3.Only mean that
+    we just want to apply it to this line.
+    the other two part are just the beginning and the end of the rule.
+     another variation will be :
+        rules: {[1 + all|20,25|30,25]};
+        So in this case we just had one to the position of each tracker in the
+        undisclosed axis .
+batch:
+    batchRp(value){
+      UAxis:value;
+      X:value;
+      Z:value;
+      id:value;
+    }
+    use to modify the image imported in their axis
+QI(quick import):
+    {
+    path:C:\\Users\\aymar\\Downloads\\pig3d\\pigTop.png;
+    chosenAxe:Y;
+    additive:14.11;
+    val:8.4,8.4,9,8;
+    }
+    use to import image without using the editor;
+line Separation:
+    Line separation is used to execute one part after the other so the part on top of the
+    line will be executed then the bottom half it can be useful when dealing with the
+    batch that changes the position of the groups therefore will render their application
+    useless.
+

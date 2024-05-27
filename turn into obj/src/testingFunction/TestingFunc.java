@@ -1,86 +1,68 @@
 package testingFunction;
 
 import ColorsPaletteExtraction.Tracker;
-import Grid.GridPage;
-import ImageTaker.QuickImport;
-import groupCreatorSyntax.SyntaxDetector;
-import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Circle;
-import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static groupCreatorSyntax.CodingEditor.deepCopyTracker;
 import static groupCreatorSyntax.SyntaxDetector.*;
 import static javafx.application.Application.launch;
 
 public class TestingFunc {
-    public static ArrayList<String> extractGroupNames(String input) {
-        ArrayList<String> groupNames = new ArrayList<>();
+    public  static ArrayList<String> getAllBatchs(ArrayList<Tracker> cTrackers, String input){
+        String[] allLines = input.split("\n");
+        ArrayList<String> individualBatchs = new ArrayList<>();
+        // Loop through each line in the input
+        for (int i = 0; i < allLines.length; i++) {
+            if (allLines[i].contains("batchRp(")) {
+                StringBuilder t = new StringBuilder();
 
-        // Regular expression to match "GROUPNAME" sections
-        Pattern pattern = Pattern.compile("GROUPNAME\\(.*?\\)\\{[^\\}]*\\}");
-        Matcher matcher = pattern.matcher(input);
-
-        while (matcher.find()) {
-            groupNames.add(matcher.group());
+                // Process the lines after the keyword
+                for (int j = i; j < Math.min(i + 5 + 1, allLines.length); j++) {
+                    t.append(allLines[j]).append("\n");
+                }
+                // Print or process the extracted lines
+                individualBatchs.add(String.valueOf(t));
+                batchRP(cTrackers, String.valueOf(t));
+                // Remove the extracted lines from the input
+                input = input.replace(t.toString(), "");
+            }
         }
-        //"nathan"
-        return groupNames;
+        return individualBatchs;
     }
 
-
     public static void main(String[] args) {
-        String input = "GROUPNAME(back){\n" +
-                "valAxis: 9;\n" +
-                "axis: X;\n" +
-                "Corner: {[10,10],[10,10],[10,90],[90,90],[90,10]};\n" +
-                "batch: 44;\n" +
-                "color: #FFFFFF;\n" +
+        String input = "batchRp(66){\n" +
+                "  UAxis:Y;\n" +
+                "  X:1;\n" +
+                "  Z:-1;\n" +
+                "  id:tyut90;\n" +
                 "}\n" +
-                "GROUPNAME(left){\n" +
-                "valAxis: 9;\n" +
-                "axis: Z;\n" +
-                "Corner: {[10,10],[10,10],[80,10],[80,90],[10,90]};\n" +
-                "batch: 55;\n" +
-                "color: #FFFFFF;\n" +
-                "}\n" +
-                "GROUPNAME(Bottom){\n" +
-                "valAxis: 8;\n" +
-                "axis: Y;\n" +
-                "Corner: {[10,10],[10,10],[10,70],[70,70],[70,10]};\n" +
-                "batch: 66;\n" +
-                "color: #FFFFFF;\n" +
+                "batchRp(55);{\n" +
+                "  UAxis:Y;\n" +
+                "  X:-2;\n" +
+                "  Z:0;\n" +
+                "  id:tyon90;\n" +
                 "}\n" +
                 "batchRp(22){\n" +
                 "  UAxis:Y;\n" +
-                "  X:1;\n" +
+                "  X:-2;\n" +
                 "  Z:0;\n" +
+                "  id:tyut90;\n" +
+                "}\n" +
+                "batchRp(33){\n" +
+                "  UAxis:Y;\n" +
+                "  X:+1;\n" +
+                "  Z:-1;\n" +
+                "  id:BAut90;\n" +
                 "}";
-        ArrayList<Tracker> copyArrayList = new ArrayList<>();
-        for (Tracker tracker : GridPage.theMainExtratorArr) {
-            copyArrayList.add(deepCopyTracker(tracker));
-        }
-        if (input.contains("batchRp(")){
-            getAllBatchs(copyArrayList,input);
-        }
+        ArrayList<Tracker> test = new ArrayList<>();
+        ArrayList<String> splitStrings = getAllBatchs(test,input);
 
-        //System.out.println();
+        // Print the results
+        for (String str : idList) {
+
+            System.out.println(str);
+        }
     }
 }
 

@@ -1,8 +1,0 @@
-Issues 
--y axis{when using batchs}
--separation on the script
--count for batch {add something tha will allow me to use the batchs on time}
-
-Left To Do 
--other image
--rule testing

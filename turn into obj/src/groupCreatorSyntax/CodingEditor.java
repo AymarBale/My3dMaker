@@ -46,7 +46,6 @@ public class CodingEditor extends Application {
         Group trackerGroup = new Group();
         Camera cam = new PerspectiveCamera();
         SubScene subScene = new SubScene(trackerGroup, width, height, true, SceneAntialiasing.BALANCED);
-        //initMouseControl(trackerGroup,subScene,primaryStage);
         initmouse(trackerGroup,subScene,primaryStage);
         subScene.setCamera(cam);
         subScene.setLayoutX(width);
@@ -58,81 +57,84 @@ public class CodingEditor extends Application {
         Button createGroup = new Button("Create Group");
 
         visualize.setOnAction(EventTest -> {
-            ArrayList<Tracker> ruleArr = new ArrayList<>();
-            ArrayList<Tracker> copyArrayList = new ArrayList<>();
-            ArrayList<Tracker> vizualiseRuleArr = new ArrayList<>();
-            for (Tracker tracker : GridPage.theMainExtratorArr) {
-                copyArrayList.add(deepCopyTracker(tracker));
-            }
-            if(!(text.getText().equals(""))){
-                //Utils.UpdateSquares();
-                if(text.getText().contains("GROUPNAME")){ //--> issue
-                    ArrayList<String> myInputs = MyTextGroup.getAllGroups(text.getText());
-                    for (int j = 0; j < myInputs.size(); j++) {
-                        ArrayList<Circle> points = new ArrayList<>();
-                        String textVal = myInputs.get(j);
-                        createCirclesFromCoordinates(extractCornerLine(textVal),points);
-                        Polygon poly = createPolyWithText(points);
+            for (int k = 0; k < splitStringByDelimiter(text.getText()).size(); k++) {
+                String textPart = splitStringByDelimiter(text.getText()).get(k);
 
-                        MyTextGroup textGroup = convertGroups(textVal);
+                ArrayList<Tracker> ruleArr = new ArrayList<>();
+                ArrayList<Tracker> copyArrayList = new ArrayList<>();
+                ArrayList<Tracker> vizualiseRuleArr = new ArrayList<>();
+                for (Tracker tracker : GridPage.theMainExtratorArr) {
+                    copyArrayList.add(deepCopyTracker(tracker));
+                }
+                if(!(textPart.equals(""))){
+                    //Utils.UpdateSquares();
+                    if(textPart.contains("GROUPNAME")){ //--> issue
+                        ArrayList<String> myInputs = MyTextGroup.getAllGroups(textPart);
+                        for (int j = 0; j < myInputs.size(); j++) {
+                            ArrayList<Circle> points = new ArrayList<>();
+                            String textVal = myInputs.get(j);
+                            createCirclesFromCoordinates(extractCornerLine(textVal),points);
+                            Polygon poly = createPolyWithText(points);
 
-                        for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
+                            MyTextGroup textGroup = convertGroups(textVal);
 
-                            if ((poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) |
-                                    (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y + 5))|
-                                    (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y - 5))|
-                                    (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y - 5))|
-                                    (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y + 5))) &&
-                                    GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
-                                GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
-                                copyArrayList.get(i).z = textGroup.valAxis;
-                                ruleArr.add(GridPage.theMainExtratorArr.get(i));
-                                vizualiseRuleArr.add(copyArrayList.get(i));
-                            }else {
-                                if(GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
-                                    //System.out.println("Not Inside --->:"+GridPage.theMainExtratorArr.get(i).x +" "+GridPage.theMainExtratorArr.get(i).y+"<---");
+                            for (int i = 0; i < GridPage.theMainExtratorArr.size(); i++) {
+
+                                if ((poly.contains(GridPage.theMainExtratorArr.get(i).x, GridPage.theMainExtratorArr.get(i).y) |
+                                        (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y + 5))|
+                                        (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                                        (poly.contains(GridPage.theMainExtratorArr.get(i).x + 5, GridPage.theMainExtratorArr.get(i).y - 5))|
+                                        (poly.contains(GridPage.theMainExtratorArr.get(i).x - 5, GridPage.theMainExtratorArr.get(i).y + 5))) &&
+                                        GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+                                    GridPage.theMainExtratorArr.get(i).z = textGroup.valAxis / 10;
+                                    copyArrayList.get(i).z = textGroup.valAxis;
+                                    ruleArr.add(GridPage.theMainExtratorArr.get(i));
+                                    vizualiseRuleArr.add(copyArrayList.get(i));
+                                }else {
+                                    if(GridPage.theMainExtratorArr.get(i).batch == textGroup.batch){
+                                        //System.out.println("Not Inside --->:"+GridPage.theMainExtratorArr.get(i).x +" "+GridPage.theMainExtratorArr.get(i).y+"<---");
+                                    }
                                 }
                             }
+                            detectRule(textVal,ruleArr,vizualiseRuleArr);
                         }
-                        detectRule(textVal,ruleArr,vizualiseRuleArr);
+                    }
+                    if (textPart.contains("batchRp(")){
+                        getAllBatchs(copyArrayList,textPart);
                     }
                 }
-                if (text.getText().contains("batchRp(")){
-                    getAllBatchs(copyArrayList,text.getText());
+                trackerGroup.getChildren().clear();
+                for (Tracker tracker : copyArrayList) {
+                    if(tracker.axis.equals("X")){
+                        Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
+                        PhongMaterial material = new PhongMaterial();
+                        material.setDiffuseColor(tracker.col); // Use the color of the tracker
+                        box.setMaterial(material);
+                        box.setTranslateX((width/2)+tracker.x); // Set the position of the box
+                        box.setTranslateY((height/2)+tracker.y);
+                        box.setTranslateZ(tracker.z);
+                        trackerGroup.getChildren().add(box);
+                    }else if (tracker.axis.equals("Z")){
+                        Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
+                        PhongMaterial material = new PhongMaterial();
+                        material.setDiffuseColor(tracker.col); // Use the color of the tracker
+                        box.setMaterial(material);
+                        box.setTranslateX((width/2)+tracker.z); // Set the position of the box
+                        box.setTranslateY((height/2)+tracker.y);
+                        box.setTranslateZ(tracker.x);
+                        trackerGroup.getChildren().add(box);
+                    }else if (tracker.axis.equals("Y")){
+                        Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
+                        PhongMaterial material = new PhongMaterial();
+                        material.setDiffuseColor(tracker.col); // Use the color of the tracker
+                        box.setMaterial(material);
+                        box.setTranslateX((width/2)+tracker.x); // Set the position of the box
+                        box.setTranslateY((height/2)+tracker.z);
+                        box.setTranslateZ(tracker.y);
+                        trackerGroup.getChildren().add(box);
+                    }
                 }
             }
-            trackerGroup.getChildren().clear();
-            for (Tracker tracker : copyArrayList) {
-                if(tracker.axis.equals("X")){
-                    Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
-                    PhongMaterial material = new PhongMaterial();
-                    material.setDiffuseColor(tracker.col); // Use the color of the tracker
-                    box.setMaterial(material);
-                    box.setTranslateX((width/2)+tracker.x); // Set the position of the box
-                    box.setTranslateY((height/2)+tracker.y);
-                    box.setTranslateZ(tracker.z);
-                    trackerGroup.getChildren().add(box);
-                }else if (tracker.axis.equals("Z")){
-                    Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
-                    PhongMaterial material = new PhongMaterial();
-                    material.setDiffuseColor(tracker.col); // Use the color of the tracker
-                    box.setMaterial(material);
-                    box.setTranslateX((width/2)+tracker.z); // Set the position of the box
-                    box.setTranslateY((height/2)+tracker.y);
-                    box.setTranslateZ(tracker.x);
-                    trackerGroup.getChildren().add(box);
-                }else if (tracker.axis.equals("Y")){
-                    Box box = new Box(10, 10, 10); // Set the size of the box as per your requirement
-                    PhongMaterial material = new PhongMaterial();
-                    material.setDiffuseColor(tracker.col); // Use the color of the tracker
-                    box.setMaterial(material);
-                    box.setTranslateX((width/2)+tracker.x); // Set the position of the box
-                    box.setTranslateY((height/2)+tracker.z);
-                    box.setTranslateZ(tracker.y);
-                    trackerGroup.getChildren().add(box);
-                }
-            }
-
         });
         pane.getChildren().add(visualize);
         pane.getChildren().add(createGroup);
@@ -215,7 +217,25 @@ public class CodingEditor extends Application {
 
         return integerList;
     }
+    public static ArrayList<String> splitStringByDelimiter(String input) {
+        ArrayList<String> result = new ArrayList<>();
+        String delimiter = "----";
 
+        // Split the input string into two parts at the first occurrence of the delimiter
+        int delimiterIndex = input.indexOf(delimiter);
+        if (delimiterIndex != -1) {
+            String part1 = input.substring(0, delimiterIndex).trim();
+            String part2 = input.substring(delimiterIndex + delimiter.length()).trim();
+
+            result.add(part1);
+            result.add(part2);
+        } else {
+            // If the delimiter is not found, return the entire string as the first element
+            result.add(input.trim());
+        }
+
+        return result;
+    }
     private void initmouse(Group root,SubScene scene,Stage stage){
         Rotate xrotate;
         Rotate yrotate;

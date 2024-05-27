@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 public class SyntaxDetector extends Application {
     static ArrayList<MyTextGroup> groupList = new ArrayList<>();
+    public static ArrayList<String> idList = new ArrayList<>();
     @Override
     public void start(Stage primaryStage) {
         GridPane gridPane = new GridPane();
@@ -60,6 +61,10 @@ public class SyntaxDetector extends Application {
                 Group remake = new Group();
                 remake = remakeForViewer(myCubes,remake,10.270);
                 smallPane.setLayoutX(280);
+
+                root.setLayoutY(getLowestY(myCubes)+20);
+                smallPane.setLayoutY(smallPane.getLayoutY()-root.getLayoutY());
+                l.myLin.setLayoutY(smallPane.getLayoutY()-root.getLayoutY());
                 root.getChildren().add(smallPane);
                 root.getChildren().add(remake);
                 root.getChildren().add(l.myLin);
@@ -158,7 +163,7 @@ public class SyntaxDetector extends Application {
 
         return t;
     }
-    //Not Inside --->:
+
     public  static void getAllBatchs(ArrayList<Tracker> cTrackers,String input){
         String[] allLines = input.split("\n");
         ArrayList<String> individualBatchs = new ArrayList<>();
@@ -205,9 +210,15 @@ public class SyntaxDetector extends Application {
         int yStartIndex = input.indexOf(characters.get(1)+":") + 2; // Start index of Y:
         int yEndIndex = input.indexOf(";", yStartIndex); // End index of Y:
         String y = input.substring(yStartIndex, yEndIndex).trim();
-        updateTrackersWithBatch(cTrackers,valAxis,Integer.parseInt(x),Integer.parseInt(y),Integer.parseInt(batch));
-        Utils.updateSquares(Integer.parseInt(batch));
-        System.out.println(batch+" "+x);
+
+        int idStartIndex = input.indexOf("id:")+3;
+        int isEndIndex = input.indexOf(";",idStartIndex);
+        String id = input.substring(idStartIndex, isEndIndex).trim();
+        if(!idList.contains(id)){
+            idList.add(id);
+            updateTrackersWithBatch(cTrackers,valAxis,Integer.parseInt(x),Integer.parseInt(y),Integer.parseInt(batch));
+            Utils.updateSquares(Integer.parseInt(batch));
+        }
     }
 
     public static ArrayList<String> getFirstLetterAfterSecondSemicolon(String input) {
@@ -330,7 +341,16 @@ public class SyntaxDetector extends Application {
         return polygon;
     }
 
-
+    public static double getLowestY(ArrayList<Tracker> trackers) {
+        double lowestY = Double.MAX_VALUE; // Initialize with maximum possible value
+        for (Tracker tracker : trackers) {
+            System.out.println(tracker.y);
+            if (tracker.y < lowestY) {
+                lowestY = tracker.y; // Update lowestY if current tracker's y is lower
+            }
+        }
+        return lowestY; // Return the lowest y value found
+    }
 
     public static ArrayList<Tracker> getArrayListForCornerViewer(String axe,int batch){
         ArrayList<Tracker> myCubes = new ArrayList<>();
